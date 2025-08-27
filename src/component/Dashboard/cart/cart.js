@@ -29,8 +29,13 @@ function Cart(){
         dispatch(clearCartItem())
     }
     function order(){
-        alert('Your order placed successfully!!')
-        dispatch(clearCartItem())
+        const user = sessionStorage.getItem('user');
+        if (!user) {
+            history.push('/login');
+        } else {
+            alert('Your order placed successfully!!');
+            dispatch(clearCartItem());
+        }
     }
     return(
         <div className="cart-bg">
