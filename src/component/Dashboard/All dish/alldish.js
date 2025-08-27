@@ -15,17 +15,17 @@ function Alldish(){
     const location=useLocation();
     const [detail,setdetail]=useState([])
     useEffect(()=>{
-        let data = Food.filter((ele)=>ele.titleId==query.get('id'));
+        const query = new URLSearchParams(location.search);
+        let data = Food.filter((ele)=>ele.titleId === query.get('id'));
         console.log(data)
         setdetail(data)
        
-    },[])
+    },[location.search])
     const cart=useSelector((state)=>state.cart)
     useEffect(()=>{
         
         dispatch(getTotals())
     },[cart,dispatch])
-    let query = new URLSearchParams(location.search)
     function detailed(id){
         history.push(`/singledish?id=${id}`)
     }
