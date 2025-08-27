@@ -4,6 +4,7 @@
     padding:20px 0px 5px 0px;
     margin-bottom: 10px;
     background-color: rgba(5, 255, 247, 0.641);
+    position: -webkit-sticky;
     position: sticky;
     top:0;
     z-index: 999;
