@@ -4,7 +4,7 @@ import Header from "../header/header";
 import profile from '../image/profile.png'
 import '../profile/profilr.css'
 function Profile(){
-    let data= JSON.parse (sessionStorage.getItem('user') )
+    let data = JSON.parse(sessionStorage.getItem('user'));
     const[inputValue,setInput]=useState('')
     const [inputErr,setinputErr]=useState(false)
     const [list,listvalue]=useState([])
@@ -21,7 +21,8 @@ function Profile(){
     }
     }
     function Saveprofile(){
-       sessionStorage.setItem('profile',JSON.stringify({'name':data.name ,'address':list}))
+    if (!data) return;
+    sessionStorage.setItem('profile',JSON.stringify({'name':data.name ,'address':list}))
     }
     function remove(listname){
        let removeList=list.filter((ele)=>(ele!==listname))
@@ -33,8 +34,7 @@ function Profile(){
             <div className="profile-main">
                 <img src={profile} className='imge' alt="User profile" /> <br />
                 <label> UserName </label>
-                : <p> {data.name}</p><br />
-                
+                : <p> {data ? data.name : <span style={{color:'red'}}>Not logged in</span>}</p><br />
                 <label> Phone no </label>
                 : <p>8597******</p>
                 <label>Address </label>
