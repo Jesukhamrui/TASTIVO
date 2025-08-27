@@ -18,14 +18,14 @@ function Footer(){
     }
     return(
         <div className="footer">
-              <img src={logo} className='flogo'></img>
+              <img src={logo} className='flogo' alt="Tastivo logo"></img>
               <div className="footer-main">
                 <div>
                     <h4>Company</h4>
                     <ul>
-                        <li>About us</li>
-                        <li>Team</li>
-                        <li>Need help? Contact Us </li>
+                        <li><Link to={'/about'} className='linkto'>About us</Link></li>
+                        <li><Link to={'/team'} className='linkto'>Team</Link></li>
+                        <li><Link to={'/contact'} className='linkto'>Need help? Contact Us</Link></li>
                     </ul>
                 </div>
                 <div>
@@ -55,11 +55,19 @@ function Footer(){
                 </div>
                 <div>
                     <h4>Contact us</h4>
-                    <a href="#"><img src={insta} className='footerimg' ></img></a>
-                    <a href="#"><img src={whatsapp}  className='footerimg'></img></a>
-                    <a href="#"><img src={pintrest} className='footerimg' ></img></a>
-                    <a href="www.linkedin.com/in/jesu-khamrui-3abaa8340"><img src={linkedin} className='footerimg' ></img></a>
-                    <a href="#"><img src={youtube} className='footerimg' ></img></a>
+                    <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">
+                        <img src={insta} className='footerimg' alt="Instagram" />
+                    </a>
+                    <a href="https://wa.me/" target="_blank" rel="noopener noreferrer">
+                        <img src={whatsapp} className='footerimg' alt="WhatsApp" />
+                    </a>
+                    <a href="https://www.pinterest.com/" target="_blank" rel="noopener noreferrer">
+                        <img src={pintrest} className='footerimg' alt="Pinterest" />
+                    </a>
+                    <a href="www.linkedin.com/in/jesu-khamrui-3abaa8340"><img src={linkedin} className='footerimg' alt="LinkedIn" ></img></a>
+                    <a href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer">
+                        <img src={youtube} className='footerimg' alt="YouTube" />
+                    </a>
                 </div>
               
               </div>
