@@ -1,21 +1,14 @@
 import React, { useState } from "react";
 import '../register/register.css'
-import { Link, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 function Login(){
-    const [loginName,setLoginName]=useState('')
-    const [loginPassword,setLoginPassword]=useState('')
-    const [loginNameErr,setLoginNameErr]=useState(false)
-    const [loginPasswordErr,setPasswordErr]=useState(false)
-    const [incorrectErr,setincorrectErr]=useState(false)
-   //  function showpassword(e){
-   //    if(e.type === "password"){
-   //       e.type='text'
-   //    }
-   //    else{
-   //       e.type ="password"
-   //    }
-   //  }
-      const history=useHistory()
+   const [loginName,setLoginName]=useState('')
+   const [loginPassword,setLoginPassword]=useState('')
+   const [loginNameErr,setLoginNameErr]=useState(false)
+   const [loginPasswordErr,setPasswordErr]=useState(false)
+   const [incorrectErr,setincorrectErr]=useState(false)
+   // ...existing code...
+   const history=useHistory()
     function Loginvalidation() { 
          
              if(loginName.trim().length!==0){
@@ -30,39 +23,37 @@ function Login(){
                      else{ 
                         setPasswordErr(true)
                      }
-let register= JSON.parse (sessionStorage.getItem('user') )
-if((register.name!==loginName)||(register.password!==loginPassword)){
-    setincorrectErr(true)
- }
- else{
-    setincorrectErr(false)
-    history.push('/home') 
- }
+   let register = JSON.parse(sessionStorage.getItem('user'));
+   if (!register) {
+      setincorrectErr(true);
+      return;
+   }
+   if ((register.name !== loginName) || (register.password !== loginPassword)) {
+      setincorrectErr(true);
+   } else {
+      setincorrectErr(false);
+      history.push('/home');
+   }
     
 }
-  return(
-        <div className="login-body">
-        <div className="login-main">
-            <h1>Login </h1>   
-            {incorrectErr&& <small style={{color:'red',textAlign:'center'}}> Enter the correct username and password</small>}   
+   return(
+      <div className="login-body">
+         <div className="login-main">
+            <h1>Login </h1>
+            {incorrectErr&& <small style={{color:'red',textAlign:'center'}}> Enter the correct username and password</small>}
             <br />
-             <p>Name</p>
+            <p>Name</p>
             <input type='text' value={loginName} onChange={(e)=>{setLoginName(e.target.value)}}></input>
-             {loginNameErr&& <small  style={{color:'#d3521d'}}>Please enter the Username</small>}
+            {loginNameErr&& <small  style={{color:'#d3521d'}}>Please enter the Username</small>}
             <br />
             <p>Password</p>
             <input type='password' value={loginPassword} onChange={(e)=>{setLoginPassword(e.target.value)}}></input>
-             {loginPasswordErr&& <small  style={{color:'#d3521d'}}>Please enter the password </small>}
-            {/* <div>
-            <input type="checkbox" onclick={()=>showpassword(loginPassword)} />Show Password
-            </div> */}
+            {loginPasswordErr&& <small  style={{color:'#d3521d'}}>Please enter the password </small>}
             <br />
-          
             <button onClick={Loginvalidation}>Login</button><br />
-            <p style={{fontSize:'15px'}}>Doesn't have an account yet? <Link to={'/'}>Sign up</Link></p>
-        </div>
-
-        </div>
-    )
+            <a href="/register" style={{marginTop:'10px',display:'inline-block'}}>Doesn't have an account yet? Sign up</a>
+         </div>
+      </div>
+   )
 }
 export default Login
