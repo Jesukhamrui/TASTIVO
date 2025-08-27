@@ -1,5 +1,97 @@
 
 const Food = [
+    // Mexican Food
+    {
+        id: 1001,
+        url: require("../component/Dashboard/image/mexicanfood.jpg"),
+        rate: '120',
+        title: 'Tacos',
+        quantity: '3 pieces',
+        star: 4.5,
+        description: 'Classic Mexican tacos with beef, lettuce, cheese, and salsa.',
+        titlename: 'MexicanFood',
+        titleId: 1001
+    },
+    {
+        id: 1002,
+        url: require("../component/Dashboard/image/mexicanfood.jpg"),
+        rate: '150',
+        title: 'Burrito',
+        quantity: '1 large',
+        star: 4.7,
+        description: 'Flour tortilla filled with beans, rice, chicken, and veggies.',
+        titlename: 'MexicanFood',
+        titleId: 1001
+    },
+    // Chinese Food
+    {
+        id: 2001,
+        url: require("../component/Dashboard/image/chinesefood.jpg"),
+        rate: '110',
+        title: 'Chow Mein',
+        quantity: '1 plate',
+        star: 4.6,
+        description: 'Stir-fried noodles with vegetables and chicken.',
+        titlename: 'ChineseFood',
+        titleId: 2001
+    },
+    {
+        id: 2002,
+        url: require("../component/Dashboard/image/chinesefood.jpg"),
+        rate: '130',
+        title: 'Spring Rolls',
+        quantity: '4 pieces',
+        star: 4.3,
+        description: 'Crispy rolls stuffed with veggies and served with sweet chili sauce.',
+        titlename: 'ChineseFood',
+        titleId: 2001
+    },
+    // American Food
+    {
+        id: 3001,
+        url: require("../component/Dashboard/image/americanfood.jpg"),
+        rate: '140',
+        title: 'Burger',
+        quantity: '1 piece',
+        star: 4.8,
+        description: 'Juicy beef burger with cheese, lettuce, and tomato.',
+        titlename: 'AmericanFood',
+        titleId: 3001
+    },
+    {
+        id: 3002,
+        url: require("../component/Dashboard/image/americanfood.jpg"),
+        rate: '90',
+        title: 'Fries',
+        quantity: '1 plate',
+        star: 4.2,
+        description: 'Crispy golden fries served with ketchup.',
+        titlename: 'AmericanFood',
+        titleId: 3001
+    },
+    // Thai Food
+    {
+        id: 4001,
+        url: require("../component/Dashboard/image/thaifood.jpg"),
+        rate: '160',
+        title: 'Pad Thai',
+        quantity: '1 plate',
+        star: 4.7,
+        description: 'Rice noodles stir-fried with shrimp, tofu, peanuts, and bean sprouts.',
+        titlename: 'ThaiFood',
+        titleId: 4001
+    },
+    {
+        id: 4002,
+        url: require("../component/Dashboard/image/thaifood.jpg"),
+        rate: '120',
+        title: 'Green Curry',
+        quantity: '1 bowl',
+        star: 4.5,
+        description: 'Spicy Thai green curry with chicken and vegetables.',
+        titlename: 'ThaiFood',
+        titleId: 4001
+    },
     {
         id: 1,
         url: require("../component/Dashboard/image/Indfood-1.jpg"),
@@ -75,8 +167,6 @@ const Food = [
         quantity: '2 pieces',
         star: 5,
         description: 'Fish fry is cooked by coating it with flours and spices which adds crispness and spiciness.fish battered and fried with authentic andra spices. And served in a traditional south Indian masala - Served with Res Chutni & Onion Salad',
-        title: 'IndianFood',
-        titleId: 1,
         titlename: 'IndianFood',
         titleId: 1
     },
