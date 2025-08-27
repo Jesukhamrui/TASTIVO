@@ -43,14 +43,16 @@ function Indianfood(){
         <div className="card-image" >
             {  
                 Food1.map((ele)=>{
-                    return <>
-                     <div key={ele.id} className='Perslide' >
-                    <img src={ele.url} alt={ele.title} onClick={()=>detail(ele.id)}></img>
-                    <p>{ele.title}{' '}[{ele.quantity}] </p>
-                    <span style={{display:'block'}}>₹{ele.rate}</span>
-                    <button className="slide-cart-button" onClick={order}>Order</button>{'  '}<button className="slide-cart-button" onClick={()=>AddtoCart(ele)}>+Add toCart</button>
-                </div>
-                 </>
+                    return (
+                        <React.Fragment key={ele.id}>
+                            <div className='Perslide'>
+                                <img src={ele.url} alt={ele.title} onClick={()=>detail(ele.id)}></img>
+                                <p>{ele.title}{' '}[{ele.quantity}] </p>
+                                <span style={{display:'block'}}>₹{ele.rate}</span>
+                                <button className="slide-cart-button" onClick={order}>Order</button>{'  '}<button className="slide-cart-button" onClick={()=>AddtoCart(ele)}>+Add toCart</button>
+                            </div>
+                        </React.Fragment>
+                    );
                 })
             }
             <button onClick={()=>Alldish(Food1[0].titleId) } className='imsa' >See more</button>
