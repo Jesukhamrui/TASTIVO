@@ -24,3 +24,30 @@
   text-align: center;
   margin-bottom: 20px;
 }
+
+.info-content {
+  width: 100%;
+  max-width: 1000px;
+  background: #fff;
+  border-radius: 10px;
+  padding: 24px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
+
+.info-section {
+  margin: 18px 0;
+  text-align: left;
+}
+
+.info-section h3 { color: #6b2b2b; margin-bottom: 8px }
+
+.team-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:18px; margin-top:12px }
+.team-card { background:#fff; padding:12px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.06); text-align:center }
+.team-avatar { width:88px; height:88px; border-radius:999px; object-fit:cover; margin-bottom:10px }
+.team-name { font-weight:700 }
+.team-role { color:#666; font-size:0.9rem }
+
+.contact-form { max-width:700px; margin:0 auto; display:flex; flex-direction:column; gap:10px }
+.contact-form input, .contact-form textarea { padding:10px; border:1px solid #ddd; border-radius:6px; font-size:1rem }
+.contact-form button { background:#7e2020; color:white; padding:10px 14px; border:none; border-radius:6px; cursor:pointer }
+.contact-success { color:green; font-weight:600; margin-top:8px }
