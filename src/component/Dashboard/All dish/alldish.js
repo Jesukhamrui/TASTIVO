@@ -16,7 +16,9 @@ function Alldish(){
     const [detail,setdetail]=useState([])
     useEffect(()=>{
         const query = new URLSearchParams(location.search);
-        let data = Food.filter((ele)=>ele.titleId === query.get('id'));
+        const idParam = query.get('id');
+        const idNumber = idParam ? Number(idParam) : null;
+        let data = Food.filter((ele)=> ele.titleId === idNumber );
         console.log(data)
         setdetail(data)
        
