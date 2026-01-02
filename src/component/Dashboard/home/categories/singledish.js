@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Food from "../../../foodimage";
-import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Header from "../../header/header";
 import Footer from "../../footer/footer";
@@ -9,16 +8,15 @@ import { useDispatch,useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { addTocart, getTotals } from "../../cart/cartslice";
 
+const API_BASE_URL = "http://localhost:5000";
+
 function Singledish(){
     const dispatch=useDispatch()
     const location=useLocation();
     const history=useHistory()
     const [detail,setdetail]=useState({})
-    useEffect(()=>{
-        let data = Food.filter((ele)=>ele.id==query.get('id'));
-        console.log(data)
-        setdetail(data[0])
-    },[])
+    const [isFavorite, setIsFavorite] = useState(false);
+    const [favLoading, setFavLoading] = useState(false);
     const cart=useSelector((state)=>state.cart)
     useEffect(()=>{
         
@@ -28,6 +26,65 @@ function Singledish(){
         dispatch(addTocart(detail))
     }
     let query = new URLSearchParams(location.search)
+
+    useEffect(()=>{
+        let data = Food.filter((ele)=>ele.id==query.get('id'));
+        setdetail(data[0])
+    },[query])
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (!token || !detail || !detail.id) return;
+
+        async function fetchFavorites() {
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/favorites`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                if (!res.ok) return;
+                const data = await res.json();
+                const exists = data.some((dish) => String(dish.id) === String(detail.id));
+                setIsFavorite(exists);
+            } catch (e) {
+                console.error('Failed to load favorites', e);
+            }
+        }
+
+        fetchFavorites();
+    }, [detail]);
+
+    async function toggleFavorite() {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            history.push('/login');
+            return;
+        }
+        if (!detail || !detail.id) return;
+
+        try {
+            setFavLoading(true);
+            const method = isFavorite ? 'DELETE' : 'POST';
+            const res = await fetch(`${API_BASE_URL}/api/favorites/${detail.id}`, {
+                method,
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                alert(data.error || 'Unable to update favorites right now.');
+                return;
+            }
+            setIsFavorite(!isFavorite);
+        } catch (e) {
+            console.error('Error updating favorites', e);
+            alert('Something went wrong. Please try again.');
+        } finally {
+            setFavLoading(false);
+        }
+    }
     function order(){
         history.push('/cart')
     }
@@ -49,8 +106,17 @@ function Singledish(){
             <p><span >Description:</span><br />{detail.description}</p>
             <div><span>Available Only At :</span><p>9am to 9pm</p></div>
             <br />
-            <button onClick={()=>AddtoCart(detail)}> + Add to Cart</button>
-            <button style={{marginLeft:'20px'}} onClick={order}>Order</button>
+                        <button onClick={()=>AddtoCart(detail)}> + Add to Cart</button>
+                        <button style={{marginLeft:'20px'}} onClick={order}>Order</button>
+                        <button
+                            type="button"
+                            className={`favorite-btn ${isFavorite ? 'favorited' : ''}`}
+                            onClick={toggleFavorite}
+                            disabled={favLoading}
+                            style={{ marginLeft: '20px' }}
+                        >
+                            {isFavorite ? '♥ Favorited' : '♡ Add to Favorites'}
+                        </button>
             </div>
         </div>
         <Footer />
