@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-import { BrowserRouter,Switch,Route } from "react-router-dom"
+import { BrowserRouter,Switch,Route, Redirect } from "react-router-dom"
 import Login from './component/login/login';
 import Register from './component/register/register';
 import Home from './component/Dashboard/home/home.js';
@@ -15,6 +15,20 @@ import AboutUs from './component/Dashboard/AboutUs';
 import Team from './component/Dashboard/Team';
 import ContactUs from './component/Dashboard/ContactUs';
 import Favorites from './component/Dashboard/Favorites';
+
+const ProtectedRoute = ({ component: Component, ...rest }) => (
+  <Route
+    {...rest}
+    render={(props) => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        return <Redirect to="/login" />;
+      }
+      return <Component {...props} />;
+    }}
+  />
+);
+
 function App() {
   store.dispatch(getTotals())
 
@@ -27,15 +41,15 @@ function App() {
   <Route exact path='/'> <Home /> </Route>
   <Route path='/login'> <Login /> </Route>
   <Route path='/register'> <Register /> </Route>
-        <Route path='/home'> <Home /></Route>
-        <Route path='/cart'> <Cart /></Route>
-        <Route path='/singledish'> <Singledish /></Route>
-        <Route path='/alldish'> <Alldish /></Route>
-  <Route path='/profile'> <Profile /></Route>
+          <Route path='/home'> <Home /></Route>
+          <ProtectedRoute path='/cart' component={Cart} />
+          <Route path='/singledish'> <Singledish /></Route>
+          <Route path='/alldish'> <Alldish /></Route>
+          <ProtectedRoute path='/profile' component={Profile} />
   <Route path='/about'> <AboutUs /> </Route>
   <Route path='/team'> <Team /> </Route>
   <Route path='/contact'> <ContactUs /> </Route>
-  <Route path='/favorites'> <Favorites /> </Route>
+  <ProtectedRoute path='/favorites' component={Favorites} />
       </Switch>
       </Provider>
       </BrowserRouter>
