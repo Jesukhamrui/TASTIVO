@@ -14,6 +14,7 @@ import { getTotals } from './component/Dashboard/cart/cartslice';
 import AboutUs from './component/Dashboard/AboutUs';
 import Team from './component/Dashboard/Team';
 import ContactUs from './component/Dashboard/ContactUs';
+import Favorites from './component/Dashboard/Favorites';
 function App() {
   store.dispatch(getTotals())
 
@@ -34,6 +35,7 @@ function App() {
   <Route path='/about'> <AboutUs /> </Route>
   <Route path='/team'> <Team /> </Route>
   <Route path='/contact'> <ContactUs /> </Route>
+  <Route path='/favorites'> <Favorites /> </Route>
       </Switch>
       </Provider>
       </BrowserRouter>
