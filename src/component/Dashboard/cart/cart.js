@@ -6,6 +6,8 @@ import { useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import Footer from "../footer/footer";
 import { addTocart, clearCartItem, decreaseCart, getTotals, removeCartItem } from "./cartslice";
+
+const API_BASE_URL = "http://localhost:5000";
 function Cart(){
     const history=useHistory()
     const cart=useSelector((state)=>state.cart)
@@ -28,13 +30,68 @@ function Cart(){
     function clearcart(){
         dispatch(clearCartItem())
     }
-    function order(){
-        const user = sessionStorage.getItem('user');
-        if (!user) {
+
+    async function order(){
+        if (cart.cartItems.length === 0) {
+            alert('Your cart is currently empty');
+            return;
+        }
+
+        const token = localStorage.getItem('token');
+        if (!token) {
             history.push('/login');
-        } else {
-            alert('Your order placed successfully!!');
+            return;
+        }
+
+        const items = cart.cartItems.map((cartItem) => ({
+            dishId: cartItem.id,
+            quantity: cartItem.cartQuantity,
+        }));
+
+        try {
+            // Optional: validate cart prices and availability
+            const validateResponse = await fetch(`${API_BASE_URL}/api/cart/validate`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ items }),
+            });
+
+            if (!validateResponse.ok) {
+                const errorData = await validateResponse.json().catch(() => ({}));
+                alert(errorData.error || 'Failed to validate cart. Please try again.');
+                return;
+            }
+
+            const validated = await validateResponse.json();
+
+            // Create order
+            const orderResponse = await fetch(`${API_BASE_URL}/api/orders`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({ items }),
+            });
+
+            if (!orderResponse.ok) {
+                if (orderResponse.status === 401) {
+                    history.push('/login');
+                    return;
+                }
+                const errorData = await orderResponse.json().catch(() => ({}));
+                alert(errorData.error || 'Failed to place order. Please try again.');
+                return;
+            }
+
+            const orderData = await orderResponse.json();
+            alert(`Your order #${orderData.id} placed successfully! Total ₹${validated.totalAmount}`);
             dispatch(clearCartItem());
+        } catch (error) {
+            console.error('Error while placing order:', error);
+            alert('Something went wrong while placing your order. Please try again.');
         }
     }
     return(
