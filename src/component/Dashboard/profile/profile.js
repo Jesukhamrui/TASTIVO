@@ -4,7 +4,7 @@ import Header from "../header/header";
 import profile from '../image/profile.png'
 import '../profile/profilr.css'
 function Profile(){
-    let data = JSON.parse(sessionStorage.getItem('user'));
+    let data = JSON.parse(localStorage.getItem('user'));
     const[inputValue,setInput]=useState('')
     const [inputErr,setinputErr]=useState(false)
     const [list,listvalue]=useState([])
