@@ -31,6 +31,9 @@ function Header(){
     function gotoHome(){
         history.push('/home')
     }
+    function gotoAdmin(){
+        history.push('/admin')
+    }
     function Logout(){
         localStorage.removeItem('token');
         localStorage.removeItem('user');
@@ -47,6 +50,9 @@ function Header(){
              {' '}
             <button className="cart-button" ><p style={{color:"white",marginTop:'12px'}} onClick={gotoHome}>Home</p></button>
             <button className="cart-button"  ><p style={{color:"white",marginTop:'12px'}} onClick={Profile}>Profile</p></button>  
+            {currentUser && currentUser.email && currentUser.email.toLowerCase().includes('admin') && (
+                <button className="cart-button"><p style={{color:"white",marginTop:'12px'}} onClick={gotoAdmin}>Admin</p></button>
+            )}
             {currentUser && <span style={{color:'white',marginRight:'10px'}}>Hi, {currentUser.name}</span>}
             <button className="cart-button"  ><p style={{color:"white",marginTop:'12px'}} onClick={Logout}>Log out</p></button>  
         </div>
