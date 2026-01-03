@@ -327,9 +327,14 @@ app.post('/api/contact', (req, res) => {
   res.status(201).json({ success: true });
 });
 
-// NOTE: This is a simple demo endpoint; in real apps protect this with admin auth
+// NOTE: These are simple demo endpoints; in real apps protect this with admin auth
 app.get('/api/admin/contact-messages', (req, res) => {
   res.json(contactMessages);
+});
+
+// List all orders (admin/demo)
+app.get('/api/admin/orders', (req, res) => {
+  res.json(orders);
 });
 
 // ---------------- Favorites ---------------- //
