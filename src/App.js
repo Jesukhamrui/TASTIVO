@@ -15,6 +15,7 @@ import AboutUs from './component/Dashboard/AboutUs';
 import Team from './component/Dashboard/Team';
 import ContactUs from './component/Dashboard/ContactUs';
 import Favorites from './component/Dashboard/Favorites';
+import Admin from './component/Dashboard/Admin';
 
 const ProtectedRoute = ({ component: Component, ...rest }) => (
   <Route
@@ -50,6 +51,7 @@ function App() {
   <Route path='/team'> <Team /> </Route>
   <Route path='/contact'> <ContactUs /> </Route>
   <ProtectedRoute path='/favorites' component={Favorites} />
+  <ProtectedRoute path='/admin' component={Admin} />
       </Switch>
       </Provider>
       </BrowserRouter>
