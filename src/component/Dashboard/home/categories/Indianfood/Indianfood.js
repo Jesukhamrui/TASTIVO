@@ -4,6 +4,7 @@ import Food from "../../../../foodimage";
 import { useHistory } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addTocart } from "../../../cart/cartslice";
+import RatingBadge from "../../../reviews/RatingBadge";
 import '../../../header/header.css'
 function Indianfood(){
     const dispatch=useDispatch()
@@ -48,6 +49,9 @@ function Indianfood(){
                             <div className='Perslide'>
                                 <img src={ele.url} alt={ele.title} onClick={()=>detail(ele.id)}></img>
                                 <p>{ele.title}{' '}[{ele.quantity}] </p>
+                                <div style={{ marginBottom: '8px' }}>
+                                    <RatingBadge dishId={ele.id} showCount={true} size="small" />
+                                </div>
                                 <span style={{display:'block'}}>₹{ele.rate}</span>
                                 <button className="slide-cart-button" onClick={order}>Order</button>{'  '}<button className="slide-cart-button" onClick={()=>AddtoCart(ele)}>+Add toCart</button>
                             </div>
