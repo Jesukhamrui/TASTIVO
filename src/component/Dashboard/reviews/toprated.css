@@ -1,0 +1,358 @@
+.top-rated-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.top-rated-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.top-rated-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.top-rated-header h1 {
+    font-size: 2.5rem;
+    color: #333;
+    margin-bottom: 10px;
+    background: linear-gradient(135deg, #ff6b6b 0%, #ffd700 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.top-rated-header p {
+    font-size: 1.1rem;
+    color: #666;
+}
+
+.no-ratings {
+    text-align: center;
+    padding: 80px 20px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.no-ratings h2 {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.no-ratings p {
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 25px;
+}
+
+.no-ratings button {
+    padding: 12px 30px;
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.no-ratings button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(255, 107, 107, 0.4);
+}
+
+.top-rated-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px;
+}
+
+.top-rated-card {
+    position: relative;
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s;
+}
+
+.top-rated-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.rank-badge {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: white;
+    z-index: 10;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+}
+
+.rank-1 {
+    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+    border: 3px solid #fff;
+}
+
+.rank-2 {
+    background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%);
+    border: 3px solid #fff;
+}
+
+.rank-3 {
+    background: linear-gradient(135deg, #cd7f32 0%, #e6a86f 100%);
+    border: 3px solid #fff;
+}
+
+.dish-image-container {
+    width: 100%;
+    height: 250px;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.dish-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s;
+}
+
+.top-rated-card:hover .dish-image {
+    transform: scale(1.1);
+}
+
+.dish-info {
+    padding: 20px;
+}
+
+.dish-title {
+    font-size: 1.3rem;
+    color: #333;
+    margin-bottom: 8px;
+    font-weight: 600;
+    min-height: 50px;
+}
+
+.dish-category {
+    display: inline-block;
+    padding: 4px 12px;
+    background: #f0f0f0;
+    color: #666;
+    border-radius: 15px;
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+}
+
+.rating-section {
+    margin: 15px 0;
+}
+
+.dish-price {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #ff6b6b;
+    margin: 15px 0;
+}
+
+.view-dish-btn {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.view-dish-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+/* Tablet - 2 columns */
+@media (max-width: 1024px) {
+    .top-rated-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 25px;
+    }
+
+    .top-rated-header h1 {
+        font-size: 2.2rem;
+    }
+
+    .dish-image-container {
+        height: 220px;
+    }
+}
+
+/* Mobile - 1-2 columns */
+@media (max-width: 768px) {
+    .top-rated-content {
+        padding: 30px 15px;
+    }
+
+    .top-rated-header {
+        margin-bottom: 30px;
+    }
+
+    .top-rated-header h1 {
+        font-size: 2rem;
+    }
+
+    .top-rated-header p {
+        font-size: 1rem;
+    }
+
+    .top-rated-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+    }
+
+    .dish-image-container {
+        height: 200px;
+    }
+
+    .dish-title {
+        font-size: 1.1rem;
+        min-height: 45px;
+    }
+
+    .dish-price {
+        font-size: 1.3rem;
+    }
+
+    /* Touch-friendly buttons */
+    .view-dish-btn,
+    .no-ratings button {
+        min-height: 48px;
+        font-size: 1rem;
+    }
+
+    .rank-badge {
+        width: 45px;
+        height: 45px;
+        font-size: 1.1rem;
+        top: 10px;
+        left: 10px;
+    }
+}
+
+/* Small mobile - 1 column */
+@media (max-width: 600px) {
+    .top-rated-content {
+        padding: 20px 10px;
+    }
+
+    .top-rated-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .top-rated-header p {
+        font-size: 0.95rem;
+    }
+
+    .top-rated-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .top-rated-card {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    .dish-image-container {
+        height: 250px;
+    }
+
+    .dish-info {
+        padding: 18px;
+    }
+
+    .dish-title {
+        font-size: 1.2rem;
+        min-height: 0;
+    }
+
+    .dish-price {
+        font-size: 1.4rem;
+        margin: 12px 0;
+    }
+
+    .view-dish-btn {
+        padding: 14px;
+        font-size: 1rem;
+        min-height: 48px;
+    }
+
+    .no-ratings {
+        padding: 60px 20px;
+    }
+
+    .no-ratings h2 {
+        font-size: 1.6rem;
+    }
+
+    .no-ratings p {
+        font-size: 1rem;
+    }
+
+    .no-ratings button {
+        padding: 14px 25px;
+        min-height: 48px;
+    }
+
+    .rank-badge {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+}
+
+/* Very small phones */
+@media (max-width: 400px) {
+    .top-rated-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .top-rated-grid {
+        gap: 15px;
+    }
+
+    .dish-image-container {
+        height: 200px;
+    }
+
+    .dish-info {
+        padding: 15px;
+    }
+
+    .dish-title {
+        font-size: 1.1rem;
+    }
+
+    .rank-badge {
+        width: 35px;
+        height: 35px;
+        font-size: 0.9rem;
+        border-width: 2px;
+    }
+}
