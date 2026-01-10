@@ -7,7 +7,7 @@ import Home from './component/Dashboard/home/home.js';
 import Cart from './component/Dashboard/cart/cart';
 import Singledish from './component/Dashboard/home/categories/singledish';
 import Alldish from './component/Dashboard/All dish/alldish';
-import Profile from './component/Dashboard/profile/profile';
+import ProfileNew from './component/Dashboard/profile/profile-new';
 import { Provider } from 'react-redux';
 import store from './redux/store';
 import { getTotals } from './component/Dashboard/cart/cartslice';
