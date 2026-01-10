@@ -50,7 +50,7 @@ function App() {
           <ProtectedRoute path='/checkout' component={Checkout} />
           <Route path='/singledish'> <Singledish /></Route>
           <Route path='/alldish'> <Alldish /></Route>
-          <ProtectedRoute path='/profile' component={Profile} />
+          <ProtectedRoute path='/profile' component={ProfileNew} />
   <Route path='/about'> <AboutUs /> </Route>
   <Route path='/team'> <Team /> </Route>
   <Route path='/contact'> <ContactUs /> </Route>
