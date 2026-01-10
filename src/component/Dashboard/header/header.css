@@ -443,12 +443,43 @@
 }
 
 /* Other existing styles */
-    width: 30px;
-    height: 30px;
+.categories{
+  background-color:rgba(244, 158, 0, 0.6);
+  padding-top: 30px;
+  box-shadow: 0px 10px 30px black;
 }
 
-/* slider Css */
+.home{
+  position: relative;
+  margin: 0;
+}
 
+.bg{
+    background-image: url(../image/jeni1.jpg);
+    position: relative;
+    height: 765px;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: scroll;
+    margin-bottom: -10px;
+    margin-top: -112px;
+    box-shadow: 0px 0px 10px black;
+  }
+  
+.main-slice{
+  width: 1250px;
+  height: 830px;
+  margin: 20px auto 0px auto;
+  padding: 130px 0px;
+}
+
+.slice{
+    height: 600px;
+    border-radius: 10px;
+  }
+
+/* slider Css */
 .sliderstyle{
     height: 100%;
     position:relative;
@@ -505,4 +536,3 @@
 .dotStyle:hover{
     color:#070707; 
 }
-
