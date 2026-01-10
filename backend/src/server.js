@@ -219,6 +219,43 @@ app.get('/api/users/me', authenticateToken, (req, res) => {
   res.json(publicUser(req.user));
 });
 
+// Update profile (name, email, phone, password)
+app.put('/api/auth/update-profile', authenticateToken, async (req, res) => {
+  try {
+    const { name, email, phone, currentPassword, newPassword } = req.body;
+
+    // Validate required fields
+    if (!name || !email || !phone) {
+      return res.status(400).json({ error: 'Name, email, and phone are required' });
+    }
+
+    // If changing password, verify current password
+    if (newPassword) {
+      if (!currentPassword) {
+        return res.status(400).json({ error: 'Current password is required to set new password' });
+      }
+      const isMatch = await bcrypt.compare(currentPassword, req.user.passwordHash);
+      if (!isMatch) {
+        return res.status(401).json({ error: 'Current password is incorrect' });
+      }
+      req.user.passwordHash = await bcrypt.hash(newPassword, 10);
+    }
+
+    // Update profile
+    req.user.name = name;
+    req.user.email = email;
+    req.user.phone = phone;
+
+    res.json({
+      message: 'Profile updated successfully',
+      user: publicUser(req.user)
+    });
+  } catch (err) {
+    console.error('Error updating profile:', err);
+    res.status(500).json({ error: 'Failed to update profile' });
+  }
+});
+
 // Update profile (name only for now; extend as needed)
 app.put('/api/users/me', authenticateToken, (req, res) => {
   const { name } = req.body;

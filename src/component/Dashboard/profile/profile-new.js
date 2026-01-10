@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import Header from "../header/header";
 import Footer from "../footer/footer";
@@ -9,7 +8,6 @@ const API_BASE_URL = "http://localhost:5000";
 
 function ProfileNew() {
     const history = useHistory();
-    const favorites = useSelector((state) => state.cart?.favorites || []);
     
     const [user, setUser] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
