@@ -20,6 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 let users = [];
 let orders = [];
 let contactMessages = [];
+let reviews = [];
 
 // Simple dishes catalog for demo purposes
 const dishes = [
@@ -363,6 +364,129 @@ app.delete('/api/favorites/:dishId', authenticateToken, (req, res) => {
 app.get('/api/favorites', authenticateToken, (req, res) => {
   const favoriteDishes = dishes.filter(d => req.user.favorites.includes(d.id));
   res.json(favoriteDishes);
+});
+
+// ---------------- Reviews & Ratings Endpoints ---------------- //
+
+// Submit a review
+app.post('/api/reviews', authenticateToken, (req, res) => {
+  const { dishId, orderId, rating, comment, photos } = req.body;
+
+  if (!dishId || !rating) {
+    return res.status(400).json({ error: 'dishId and rating are required' });
+  }
+
+  if (rating < 1 || rating > 5) {
+    return res.status(400).json({ error: 'Rating must be between 1 and 5' });
+  }
+
+  const review = {
+    id: `review_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    dishId,
+    orderId: orderId || null,
+    userId: req.user.id,
+    userName: req.user.name,
+    rating: parseInt(rating),
+    comment: comment || '',
+    photos: photos || [],
+    date: new Date().toISOString(),
+    helpful: 0,
+    verified: orderId ? true : false,
+  };
+
+  reviews.push(review);
+  res.status(201).json(review);
+});
+
+// Get reviews for a specific dish
+app.get('/api/reviews/dish/:dishId', (req, res) => {
+  const { dishId } = req.params;
+  const dishReviews = reviews.filter(r => r.dishId === dishId);
+  
+  // Sort by date (newest first)
+  dishReviews.sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  res.json(dishReviews);
+});
+
+// Get average rating for a dish
+app.get('/api/reviews/dish/:dishId/rating', (req, res) => {
+  const { dishId } = req.params;
+  const dishReviews = reviews.filter(r => r.dishId === dishId);
+  
+  if (dishReviews.length === 0) {
+    return res.json({ average: 0, count: 0 });
+  }
+  
+  const sum = dishReviews.reduce((acc, review) => acc + review.rating, 0);
+  const average = (sum / dishReviews.length).toFixed(1);
+  
+  res.json({ average: parseFloat(average), count: dishReviews.length });
+});
+
+// Get all reviews by current user
+app.get('/api/reviews/user', authenticateToken, (req, res) => {
+  const userReviews = reviews.filter(r => r.userId === req.user.id);
+  userReviews.sort((a, b) => new Date(b.date) - new Date(a.date));
+  res.json(userReviews);
+});
+
+// Mark review as helpful
+app.post('/api/reviews/:reviewId/helpful', authenticateToken, (req, res) => {
+  const { reviewId } = req.params;
+  const review = reviews.find(r => r.id === reviewId);
+  
+  if (!review) {
+    return res.status(404).json({ error: 'Review not found' });
+  }
+  
+  review.helpful += 1;
+  res.json(review);
+});
+
+// Delete review (only by review author)
+app.delete('/api/reviews/:reviewId', authenticateToken, (req, res) => {
+  const { reviewId } = req.params;
+  const reviewIndex = reviews.findIndex(r => r.id === reviewId);
+  
+  if (reviewIndex === -1) {
+    return res.status(404).json({ error: 'Review not found' });
+  }
+  
+  const review = reviews[reviewIndex];
+  if (review.userId !== req.user.id) {
+    return res.status(403).json({ error: 'Not authorized to delete this review' });
+  }
+  
+  reviews.splice(reviewIndex, 1);
+  res.json({ message: 'Review deleted successfully' });
+});
+
+// Get top-rated dishes
+app.get('/api/dishes/top-rated', (req, res) => {
+  const limit = parseInt(req.query.limit) || 10;
+  
+  // Calculate average ratings for all dishes
+  const dishRatings = dishes.map(dish => {
+    const dishReviews = reviews.filter(r => r.dishId === dish.id);
+    if (dishReviews.length === 0) {
+      return { ...dish, avgRating: 0, reviewCount: 0 };
+    }
+    const sum = dishReviews.reduce((acc, r) => acc + r.rating, 0);
+    return {
+      ...dish,
+      avgRating: sum / dishReviews.length,
+      reviewCount: dishReviews.length
+    };
+  });
+  
+  // Sort by rating (high to low) and filter out dishes with no reviews
+  const topRated = dishRatings
+    .filter(d => d.reviewCount > 0)
+    .sort((a, b) => b.avgRating - a.avgRating)
+    .slice(0, limit);
+  
+  res.json(topRated);
 });
 
 // ---------------- Fallbacks & Error Handling ---------------- //
