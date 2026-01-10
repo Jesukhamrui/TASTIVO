@@ -3,6 +3,8 @@ import Food from "../../../foodimage";
 import { useLocation } from "react-router-dom";
 import Header from "../../header/header";
 import Footer from "../../footer/footer";
+import RatingBadge from "../../reviews/RatingBadge";
+import ReviewsList from "../../reviews/ReviewsList";
 import '../categories/categories.css'
 import { useDispatch,useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
@@ -101,6 +103,9 @@ function Singledish(){
             <div className="spf-second">
             <h1>{detail.title}</h1>
             <h3>[{detail.quantity}]</h3>
+            <div style={{ margin: '15px 0' }}>
+                <RatingBadge dishId={detail.id} showCount={true} />
+            </div>
             <br />
             <h1 >₹{detail.rate}</h1>
             <p><span >Description:</span><br />{detail.description}</p>
@@ -119,6 +124,13 @@ function Singledish(){
                         </button>
             </div>
         </div>
+        
+        {detail.id && (
+            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
+                <ReviewsList dishId={detail.id} showAll={false} />
+            </div>
+        )}
+        
         <Footer />
         </div>
         </>
