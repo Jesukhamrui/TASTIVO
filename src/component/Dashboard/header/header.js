@@ -9,6 +9,8 @@ function Header(){
     const {cartTotalQUantity}=useSelector((state)=>state.cart)
     let history=useHistory()
     const [currentUser,setCurrentUser] = useState(null)
+    const [searchQuery, setSearchQuery] = useState("")
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
     useEffect(()=>{
         const stored = localStorage.getItem('user');
@@ -22,11 +24,25 @@ function Header(){
             setCurrentUser(null);
         }
     },[])
+    
+    function handleSearch(e) {
+        e.preventDefault();
+        if (searchQuery.trim()) {
+            history.push(`/home?search=${encodeURIComponent(searchQuery)}`);
+        }
+    }
+    
     function AddCart(){
         history.push('/cart')
     }
     function Profile(){
         history.push('/profile')
+    }
+    function gotoMyOrders(){
+        history.push('/myorders')
+    }
+    function gotoTopRated(){
+        history.push('/toprated')
     }
     function gotoHome(){
         history.push('/home')
@@ -40,22 +56,110 @@ function Header(){
         setCurrentUser(null);
         history.push('/login')
     }
+    
+    const toggleMobileMenu = () => {
+        setMobileMenuOpen(!mobileMenuOpen);
+    }
+    
     return(
-        <div className="header">
-            <img src={logo} className='logo' alt="Tastivo logo"></img>
-            <div><input type='text' className="search-input"/><button >Search</button></div>
+        <header className="header">
+            <div className="header-container">
+                {/* Logo */}
+                <div className="header-logo" onClick={gotoHome}>
+                    <img src={logo} className='logo' alt="Tastivo logo" />
+                    <span className="logo-text">TASTIVO</span>
+                </div>
 
-            <div style={{position:'relative',width:'100px'}}><button className="cart-button" onClick={AddCart}><img  src={cartimg} alt="Cart"></img></button>
-            <span className="msg"> {cartTotalQUantity}</span></div>
-             {' '}
-            <button className="cart-button" ><p style={{color:"white",marginTop:'12px'}} onClick={gotoHome}>Home</p></button>
-            <button className="cart-button"  ><p style={{color:"white",marginTop:'12px'}} onClick={Profile}>Profile</p></button>  
-            {currentUser && currentUser.email && currentUser.email.toLowerCase().includes('admin') && (
-                <button className="cart-button"><p style={{color:"white",marginTop:'12px'}} onClick={gotoAdmin}>Admin</p></button>
-            )}
-            {currentUser && <span style={{color:'white',marginRight:'10px'}}>Hi, {currentUser.name}</span>}
-            <button className="cart-button"  ><p style={{color:"white",marginTop:'12px'}} onClick={Logout}>Log out</p></button>  
-        </div>
+                {/* Search Bar */}
+                <form className="header-search" onSubmit={handleSearch}>
+                    <input 
+                        type='text' 
+                        className="search-input"
+                        placeholder="Search for dishes, cuisines..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                    <button type="submit" className="search-button">
+                        <span className="search-icon">🔍</span>
+                        <span className="search-text">Search</span>
+                    </button>
+                </form>
+
+                {/* Desktop Navigation */}
+                <nav className="header-nav desktop-nav">
+                    <button className="nav-button" onClick={gotoHome}>
+                        🏠 Home
+                    </button>
+                    <button className="nav-button" onClick={gotoTopRated}>
+                        ⭐ Top Rated
+                    </button>
+                    <button className="nav-button" onClick={gotoMyOrders}>
+                        📦 My Orders
+                    </button>
+                    <button className="nav-button" onClick={Profile}>
+                        👤 Profile
+                    </button>
+                    {currentUser && currentUser.email && currentUser.email.toLowerCase().includes('admin') && (
+                        <button className="nav-button admin-button" onClick={gotoAdmin}>
+                            ⚙️ Admin
+                        </button>
+                    )}
+                </nav>
+
+                {/* Cart Button */}
+                <div className="header-cart" onClick={AddCart}>
+                    <button className="cart-button">
+                        <img src={cartimg} alt="Cart" />
+                        {cartTotalQUantity > 0 && (
+                            <span className="cart-badge">{cartTotalQUantity}</span>
+                        )}
+                    </button>
+                </div>
+
+                {/* User Info & Logout */}
+                <div className="header-user">
+                    {currentUser && (
+                        <span className="user-greeting">Hi, {currentUser.name}</span>
+                    )}
+                    <button className="logout-button" onClick={Logout}>
+                        🚪 Logout
+                    </button>
+                </div>
+
+                {/* Mobile Menu Toggle */}
+                <button className="mobile-menu-toggle" onClick={toggleMobileMenu}>
+                    <span className={`hamburger ${mobileMenuOpen ? 'active' : ''}`}>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </span>
+                </button>
+            </div>
+
+            {/* Mobile Navigation Menu */}
+            <nav className={`mobile-nav ${mobileMenuOpen ? 'open' : ''}`}>
+                <button className="mobile-nav-button" onClick={() => { gotoHome(); setMobileMenuOpen(false); }}>
+                    🏠 Home
+                </button>
+                <button className="mobile-nav-button" onClick={() => { gotoTopRated(); setMobileMenuOpen(false); }}>
+                    ⭐ Top Rated
+                </button>
+                <button className="mobile-nav-button" onClick={() => { gotoMyOrders(); setMobileMenuOpen(false); }}>
+                    📦 My Orders
+                </button>
+                <button className="mobile-nav-button" onClick={() => { Profile(); setMobileMenuOpen(false); }}>
+                    👤 Profile
+                </button>
+                {currentUser && currentUser.email && currentUser.email.toLowerCase().includes('admin') && (
+                    <button className="mobile-nav-button" onClick={() => { gotoAdmin(); setMobileMenuOpen(false); }}>
+                        ⚙️ Admin
+                    </button>
+                )}
+                <button className="mobile-nav-button logout-mobile" onClick={() => { Logout(); setMobileMenuOpen(false); }}>
+                    🚪 Logout
+                </button>
+            </nav>
+        </header>
     )
 }
 
