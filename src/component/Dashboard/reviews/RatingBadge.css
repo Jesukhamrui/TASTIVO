@@ -1,0 +1,139 @@
+.rating-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+    border-radius: 20px;
+    font-weight: bold;
+    color: #333;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.rating-badge.high {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    color: white;
+}
+
+.rating-badge.medium {
+    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+    color: #333;
+}
+
+.rating-badge.low {
+    background: linear-gradient(135deg, #ff9800 0%, #ff6b00 100%);
+    color: white;
+}
+
+.rating-badge-star {
+    font-size: 1rem;
+}
+
+.rating-badge-number {
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.rating-badge-count {
+    font-size: 0.75rem;
+    opacity: 0.9;
+}
+
+.review-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: white;
+    border: 2px solid #ff6b6b;
+    border-radius: 8px;
+    color: #ff6b6b;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 0.9rem;
+}
+
+.review-cta:hover {
+    background: #ff6b6b;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+.no-reviews-badge {
+    padding: 4px 10px;
+    background: #f0f0f0;
+    color: #999;
+    border-radius: 15px;
+    font-size: 0.85rem;
+}
+
+/* Size variants */
+.rating-badge.small {
+    padding: 4px 10px;
+    font-size: 0.8rem;
+}
+
+.rating-badge.small .rating-badge-star {
+    font-size: 0.85rem;
+}
+
+.rating-badge.small .rating-badge-number {
+    font-size: 0.8rem;
+}
+
+.rating-badge.small .rating-badge-count {
+    font-size: 0.7rem;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .rating-badge {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+
+    .rating-badge-star {
+        font-size: 0.95rem;
+    }
+
+    .rating-badge-number {
+        font-size: 0.9rem;
+    }
+
+    .rating-badge-count {
+        font-size: 0.7rem;
+    }
+
+    .review-cta {
+        padding: 10px 18px;
+        min-height: 44px;
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .rating-badge {
+        padding: 5px 10px;
+        font-size: 0.8rem;
+        gap: 4px;
+    }
+
+    .rating-badge.small {
+        padding: 3px 8px;
+        font-size: 0.75rem;
+    }
+
+    .review-cta {
+        width: 100%;
+        justify-content: center;
+        min-height: 48px;
+        font-size: 1rem;
+    }
+
+    .no-reviews-badge {
+        font-size: 0.8rem;
+    }
+}
