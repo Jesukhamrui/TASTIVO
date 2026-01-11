@@ -53,18 +53,6 @@
     /* scroll-behavior: smooth;  Removed for Safari iOS < 15.4 compatibility */
     
   }
-  
-  @media (max-width: 768px) {
-    .card-image, .itali-card-image, .korean-card-image {
-      padding: 0 5px;
-    }
-  }
-  
-  @media (max-width: 600px) {
-    .card-image, .itali-card-image, .korean-card-image {
-      padding: 0;
-    }
-  }
   .All-dish-card{
     display: flex;
     flex-direction: row;
