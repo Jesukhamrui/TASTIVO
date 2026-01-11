@@ -49,11 +49,14 @@ background-color: rgba(210, 239, 213, 0.9);
     background-color: transparent;
     border-radius: 10px;
     color: chocolate;
+    transition: all 0.3s ease;
+    cursor: pointer;
 }
 .cart-main-body-div button:hover{
  background-color: chocolate;
  color: white;
- box-shadow: 2px 3px 4px black;
+ box-shadow: 0 8px 20px rgba(210, 105, 30, 0.4);
+ transform: translateY(-2px);
 }
 .cart-main-body-div2{
     width: 100px;
@@ -62,9 +65,11 @@ background-color: rgba(210, 239, 213, 0.9);
     height: 100px;
     width: 100px;
     cursor: pointer;
+    transition: all 0.3s ease;
 }
 .cart-main-body img:hover{
-    box-shadow: 2px 2px 5px black;
+    transform: scale(1.1);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
 .cart-main-body-h3{
@@ -88,10 +93,13 @@ background-color: rgba(210, 239, 213, 0.9);
     color: white;
     border-radius: 10px;
     margin-left: 60px;
+    transition: all 0.3s ease;
+    cursor: pointer;
 }
 .Order-button:hover{
-    box-shadow: 2px 2px 5px black;
-    
+    background-color: rgba(37, 136, 62, 1);
+    box-shadow: 0 8px 20px rgba(37, 136, 62, 0.4);
+    transform: translateY(-2px);
 }
 .Order-button:active{
     background-color: chocolate;
