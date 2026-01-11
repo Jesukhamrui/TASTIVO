@@ -32,10 +32,12 @@
     color:grey;
     padding-bottom: 10px ;
     cursor: pointer;
+    transition: all 0.3s ease;
 }
 .footer li:hover,.linkto:hover{
   text-decoration: underline;
-  color: grey;
+  color: #fff;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
 }
 .footerimg{
     width: 30px;
@@ -43,8 +45,14 @@
     padding: 5px;
     margin: 5px;
     cursor: pointer;
+    transition: all 0.3s ease;
+}
+.footerimg:hover{
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.4));
 }
 .linkto{
     text-decoration: none;
     color: grey;
+    transition: all 0.3s ease;
 }
