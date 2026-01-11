@@ -47,11 +47,14 @@ input:focus{
     border: none;
     background-color: rgb(11, 169, 11);
     color: white;
+    transition: all 0.3s ease;
+    cursor: pointer;
     
 }
 .register-main button:hover, .login-main button:hover{
-    box-shadow: 2px 3px 5px black;
+    box-shadow: 0 8px 20px rgba(11, 169, 11, 0.4);
     background-color: rgb(3, 149, 3);
+    transform: translateY(-3px);
 }
 .login-body, .register-body{
     background-image: url(../Dashboard/image/jeni.jpg);
