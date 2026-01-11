@@ -51,17 +51,25 @@ function ProfileNew() {
     const fetchFavorites = async () => {
         try {
             const token = localStorage.getItem('token');
-            if (!token) return;
+            if (!token) {
+                console.log('No token found for favorites');
+                return;
+            }
 
+            console.log('Fetching favorites with token:', token.substring(0, 20) + '...');
             const response = await fetch(`${API_BASE_URL}/api/favorites`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 },
             });
 
+            console.log('Favorites response status:', response.status);
             if (response.ok) {
                 const data = await response.json();
+                console.log('Favorites fetched:', data);
                 setFavoritesList(data);
+            } else {
+                console.error('Failed to fetch favorites:', response.status, response.statusText);
             }
         } catch (err) {
             console.error('Error fetching favorites:', err);
@@ -87,8 +95,9 @@ function ProfileNew() {
             setError("Valid email is required");
             return false;
         }
-        if (!formData.phone.trim() || formData.phone.length < 10) {
-            setError("Valid phone number (min 10 digits) is required");
+        // Phone is optional, but if provided must be at least 10 digits
+        if (formData.phone.trim() && formData.phone.length < 10) {
+            setError("Valid phone number must be at least 10 digits");
             return false;
         }
         if (formData.newPassword && formData.newPassword !== formData.confirmPassword) {
@@ -106,6 +115,7 @@ function ProfileNew() {
             const token = localStorage.getItem('token');
             if (!token) {
                 setError("Not authenticated");
+                setLoading(false);
                 return;
             }
 
@@ -120,6 +130,10 @@ function ProfileNew() {
                 updateData.newPassword = formData.newPassword;
             }
 
+            console.log('Sending profile update:', updateData);
+            console.log('API URL:', `${API_BASE_URL}/api/auth/update-profile`);
+            console.log('Token exists:', !!token);
+
             const response = await fetch(`${API_BASE_URL}/api/auth/update-profile`, {
                 method: 'PUT',
                 headers: {
@@ -129,10 +143,13 @@ function ProfileNew() {
                 body: JSON.stringify(updateData)
             });
 
+            console.log('Response status:', response.status);
             const data = await response.json();
+            console.log('Response data:', data);
 
             if (!response.ok) {
                 setError(data.error || 'Failed to update profile');
+                setLoading(false);
                 return;
             }
 
