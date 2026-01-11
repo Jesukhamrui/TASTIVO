@@ -121,7 +121,7 @@
     font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: all 0.3s ease;
     white-space: nowrap;
 }
 
@@ -129,14 +129,17 @@
     background: rgba(255, 255, 255, 0.25);
     border-color: rgba(255, 255, 255, 0.5);
     transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
 .admin-button {
     background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    transition: all 0.3s ease;
 }
 
 .admin-button:hover {
     background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+    box-shadow: 0 8px 20px rgba(245, 87, 108, 0.4);
 }
 
 /* Cart Button */
@@ -226,6 +229,7 @@
     background: rgba(255, 107, 107, 1);
     border-color: white;
     transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
 }
 
 /* Mobile Menu Toggle */
