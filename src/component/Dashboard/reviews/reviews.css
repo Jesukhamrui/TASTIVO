@@ -96,11 +96,17 @@
 
 .star {
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s ease;
     color: #ddd;
+    display: inline-block;
 }
 
-.star:hover,
+.star:hover {
+    color: #ffc107;
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 8px rgba(255, 193, 7, 0.6));
+}
+
 .star.filled {
     color: #ffc107;
     transform: scale(1.1);
@@ -164,12 +170,13 @@
     cursor: pointer;
     font-size: 0.95rem;
     font-weight: 600;
-    transition: all 0.3s;
+    transition: all 0.3s ease;
 }
 
 .upload-btn:hover {
     background: #3b2bb8;
-    transform: translateY(-2px);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(72, 52, 212, 0.4);
 }
 
 .photo-previews {
@@ -185,6 +192,12 @@
     padding-bottom: 100%;
     border-radius: 8px;
     overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.photo-preview:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
 .photo-preview img {
@@ -194,6 +207,11 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.photo-preview:hover img {
+    transform: scale(1.1);
 }
 
 .remove-photo {
@@ -211,11 +229,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s;
+    transition: all 0.3s ease;
 }
 
 .remove-photo:hover {
-    background: rgba(255, 0, 0, 0.8);
+    background: rgba(255, 0, 0, 0.9);
+    transform: scale(1.15);
+    box-shadow: 0 4px 12px rgba(255, 0, 0, 0.5);
 }
 
 .review-actions {
