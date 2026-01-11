@@ -172,6 +172,7 @@ app.post('/api/auth/register', async (req, res, next) => {
       id: String(users.length + 1),
       name,
       email,
+      phone: '',  // Initialize phone field for future profile updates
       passwordHash,
       favorites: [],
     };
@@ -223,28 +224,44 @@ app.get('/api/users/me', authenticateToken, (req, res) => {
 app.put('/api/auth/update-profile', authenticateToken, async (req, res) => {
   try {
     const { name, email, phone, currentPassword, newPassword } = req.body;
+    
+    console.log('Update profile request received for user:', req.user?.id);
+    console.log('Request body:', { name, email, phone, hasCurrentPassword: !!currentPassword, hasNewPassword: !!newPassword });
 
     // Validate required fields
-    if (!name || !email || !phone) {
-      return res.status(400).json({ error: 'Name, email, and phone are required' });
+    if (!name || !email) {
+      console.log('Missing required fields - name or email');
+      return res.status(400).json({ error: 'Name and email are required' });
+    }
+
+    // Phone is optional but if provided must be valid
+    const phoneToUpdate = phone || '';
+    if (phone && phone.length < 10) {
+      console.log('Invalid phone number length');
+      return res.status(400).json({ error: 'Phone number must be at least 10 digits if provided' });
     }
 
     // If changing password, verify current password
     if (newPassword) {
       if (!currentPassword) {
+        console.log('New password provided but no current password');
         return res.status(400).json({ error: 'Current password is required to set new password' });
       }
       const isMatch = await bcrypt.compare(currentPassword, req.user.passwordHash);
       if (!isMatch) {
+        console.log('Current password does not match');
         return res.status(401).json({ error: 'Current password is incorrect' });
       }
       req.user.passwordHash = await bcrypt.hash(newPassword, 10);
+      console.log('Password updated');
     }
 
     // Update profile
     req.user.name = name;
     req.user.email = email;
-    req.user.phone = phone;
+    req.user.phone = phoneToUpdate;
+    
+    console.log('Profile updated successfully for user:', req.user?.id);
 
     res.json({
       message: 'Profile updated successfully',
