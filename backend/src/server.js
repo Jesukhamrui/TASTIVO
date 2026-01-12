@@ -31,6 +31,9 @@ const dishes = [
     rate: 9.99,
     category: 'Italian',
     imageUrl: '/images/italian/margherita.jpg',
+    ingredients: ['cheese', 'basil', 'tomato', 'dough'],
+    dietary: ['vegetarian'],
+    spicy: false,
   },
   {
     id: '2',
@@ -39,6 +42,9 @@ const dishes = [
     rate: 12.5,
     category: 'Indian',
     imageUrl: '/images/indian/butter-chicken.jpg',
+    ingredients: ['chicken', 'cream', 'tomato', 'spices'],
+    dietary: [],
+    spicy: true,
   },
   {
     id: '3',
@@ -47,6 +53,9 @@ const dishes = [
     rate: 8.75,
     category: 'Mexican',
     imageUrl: '/images/mexican/tacos-al-pastor.jpg',
+    ingredients: ['pork', 'pineapple', 'tortilla', 'spices'],
+    dietary: [],
+    spicy: true,
   },
   {
     id: '4',
@@ -55,6 +64,9 @@ const dishes = [
     rate: 11.0,
     category: 'Chinese',
     imageUrl: '/images/chinese/kung-pao-chicken.jpg',
+    ingredients: ['chicken', 'peanuts', 'soy sauce', 'vegetables'],
+    dietary: [],
+    spicy: true,
   },
   {
     id: '5',
@@ -63,6 +75,9 @@ const dishes = [
     rate: 10.5,
     category: 'Korean',
     imageUrl: '/images/korean/bibimbap.jpg',
+    ingredients: ['beef', 'rice', 'vegetables', 'egg', 'gochujang'],
+    dietary: [],
+    spicy: true,
   },
   {
     id: '6',
@@ -71,6 +86,9 @@ const dishes = [
     rate: 9.5,
     category: 'Thai',
     imageUrl: '/images/thai/pad-thai.jpg',
+    ingredients: ['noodles', 'tamarind', 'peanuts', 'vegetables'],
+    dietary: ['vegetarian'],
+    spicy: true,
   },
   {
     id: '7',
@@ -79,6 +97,42 @@ const dishes = [
     rate: 8.0,
     category: 'American',
     imageUrl: '/images/american/cheeseburger.jpg',
+    ingredients: ['beef', 'cheese', 'bread', 'lettuce', 'tomato'],
+    dietary: [],
+    spicy: false,
+  },
+  {
+    id: '8',
+    name: 'Veggie Burger',
+    description: 'Plant-based burger with fresh vegetables.',
+    rate: 8.5,
+    category: 'American',
+    imageUrl: '/images/american/veggie-burger.jpg',
+    ingredients: ['plant-based patty', 'vegetables', 'bread'],
+    dietary: ['vegetarian', 'vegan'],
+    spicy: false,
+  },
+  {
+    id: '9',
+    name: 'Buddha Bowl',
+    description: 'Healthy bowl with quinoa, tofu, and organic vegetables.',
+    rate: 10.0,
+    category: 'American',
+    imageUrl: '/images/american/buddha-bowl.jpg',
+    ingredients: ['quinoa', 'tofu', 'vegetables', 'tahini'],
+    dietary: ['vegetarian', 'vegan', 'gluten-free'],
+    spicy: false,
+  },
+  {
+    id: '10',
+    name: 'Paneer Tikka',
+    description: 'Indian cheese skewers marinated in yogurt and spices.',
+    rate: 9.75,
+    category: 'Indian',
+    imageUrl: '/images/indian/paneer-tikka.jpg',
+    ingredients: ['paneer', 'yogurt', 'spices', 'peppers'],
+    dietary: ['vegetarian'],
+    spicy: true,
   },
 ];
 
@@ -306,6 +360,71 @@ app.get('/api/categories/:category/dishes', (req, res) => {
   const category = req.params.category.toLowerCase();
   const filtered = dishes.filter(d => d.category.toLowerCase() === category);
   res.json(filtered);
+});
+
+// Advanced search with filters
+app.get('/api/search', (req, res) => {
+  console.log('Search request:', req.query);
+  let results = [...dishes];
+
+  // Search by name or ingredients (query parameter)
+  if (req.query.q) {
+    const query = req.query.q.toLowerCase();
+    console.log('Searching for:', query);
+    results = results.filter(d =>
+      d.name.toLowerCase().includes(query) ||
+      d.description.toLowerCase().includes(query) ||
+      d.ingredients.some(ing => ing.toLowerCase().includes(query))
+    );
+    console.log('Search results count:', results.length);
+  }
+
+  // Filter by category
+  if (req.query.category) {
+    const category = req.query.category.toLowerCase();
+    results = results.filter(d => d.category.toLowerCase() === category);
+  }
+
+  // Filter by price range
+  if (req.query.minPrice || req.query.maxPrice) {
+    const minPrice = req.query.minPrice ? parseFloat(req.query.minPrice) : 0;
+    const maxPrice = req.query.maxPrice ? parseFloat(req.query.maxPrice) : Infinity;
+    results = results.filter(d => d.rate >= minPrice && d.rate <= maxPrice);
+  }
+
+  // Filter by dietary preferences (can be multiple: vegetarian, vegan, gluten-free)
+  if (req.query.dietary) {
+    const dietaryList = Array.isArray(req.query.dietary) 
+      ? req.query.dietary 
+      : [req.query.dietary];
+    results = results.filter(d => {
+      return dietaryList.some(pref => 
+        d.dietary && d.dietary.includes(pref.toLowerCase())
+      );
+    });
+  }
+
+  // Filter by spicy preference
+  if (req.query.spicy !== undefined) {
+    const spicyPref = req.query.spicy === 'true' || req.query.spicy === '1';
+    results = results.filter(d => d.spicy === spicyPref);
+  }
+
+  // Sort results
+  if (req.query.sortBy) {
+    if (req.query.sortBy === 'price-low') {
+      results.sort((a, b) => a.rate - b.rate);
+    } else if (req.query.sortBy === 'price-high') {
+      results.sort((a, b) => b.rate - a.rate);
+    } else if (req.query.sortBy === 'name') {
+      results.sort((a, b) => a.name.localeCompare(b.name));
+    }
+  }
+
+  res.json({
+    count: results.length,
+    results: results,
+  });
 });
 
 // ---------------- Cart & Orders ---------------- //
