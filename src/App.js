@@ -19,6 +19,7 @@ import Admin from './component/Dashboard/Admin';
 import MyOrders from './component/Dashboard/orders/myorders';
 import Checkout from './component/Dashboard/orders/checkout';
 import TopRated from './component/Dashboard/reviews/TopRated';
+import SearchResults from './component/Dashboard/search/SearchResults';
 
 const ProtectedRoute = ({ component: Component, ...rest }) => (
   <Route
@@ -46,6 +47,7 @@ function App() {
   <Route path='/login'> <Login /> </Route>
   <Route path='/register'> <Register /> </Route>
           <Route path='/home'> <Home /></Route>
+          <Route path='/search'> <SearchResults /></Route>
           <ProtectedRoute path='/cart' component={Cart} />
           <ProtectedRoute path='/checkout' component={Checkout} />
           <Route path='/singledish'> <Singledish /></Route>
