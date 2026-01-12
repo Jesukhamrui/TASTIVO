@@ -50,6 +50,9 @@ function Header(){
     function gotoAdmin(){
         history.push('/admin')
     }
+    function gotoSearch(){
+        history.push('/search')
+    }
     function Logout(){
         localStorage.removeItem('token');
         localStorage.removeItem('user');
@@ -89,6 +92,9 @@ function Header(){
                 <nav className="header-nav desktop-nav">
                     <button className="nav-button" onClick={gotoHome}>
                         🏠 Home
+                    </button>
+                    <button className="nav-button" onClick={gotoSearch}>
+                        🔍 Search
                     </button>
                     <button className="nav-button" onClick={gotoTopRated}>
                         ⭐ Top Rated
