@@ -124,9 +124,6 @@ function Header(){
 
                 {/* User Info & Logout */}
                 <div className="header-user">
-                    {currentUser && (
-                        <span className="user-greeting">Hi, {currentUser.name}</span>
-                    )}
                     <button className="logout-button" onClick={Logout}>
                         🚪 Logout
                     </button>
