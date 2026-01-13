@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
 import Header from "./header/header";
 import Footer from "./footer/footer";
 import "./infoPages.css";
@@ -6,6 +7,7 @@ import "./infoPages.css";
 const API_BASE_URL = "http://localhost:5000";
 
 function Admin() {
+  const history = useHistory();
   const [contacts, setContacts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -49,6 +51,27 @@ function Admin() {
       <div className="info-page">
         <div className="info-content">
           <h2>Admin Dashboard</h2>
+          
+          {/* Quick Actions */}
+          <div style={{ marginBottom: '20px', display: 'flex', gap: '10px' }}>
+            <button 
+              onClick={() => history.push('/admin/orders')}
+              style={{
+                padding: '12px 24px',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '16px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              📦 Manage Orders
+            </button>
+          </div>
+          
           {loading && <p>Loading data...</p>}
           {error && <p style={{ color: "red" }}>{error}</p>}
 
