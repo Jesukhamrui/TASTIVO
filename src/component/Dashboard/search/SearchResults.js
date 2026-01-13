@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import SearchFilters from './SearchFilters';
 import '../../../component/Dashboard/search/searchresults.css';
 import { useDispatch, useSelector } from 'react-redux';
@@ -9,8 +9,6 @@ const SearchResults = () => {
   const [hasSearched, setHasSearched] = useState(false);
   const dispatch = useDispatch();
   const user = useSelector(state => state.user);
-
-  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
   // Handle search results from filter component
   const handleSearchResults = (searchResults) => {
