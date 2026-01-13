@@ -460,8 +460,17 @@ app.post('/api/orders', authenticateToken, (req, res) => {
     items: totals.items,
     totalAmount: totals.totalAmount,
     address: address || null,
-    status: 'PLACED',
+    status: 'pending',
+    statusHistory: [
+      {
+        status: 'pending',
+        timestamp: new Date().toISOString(),
+        note: 'Order placed successfully'
+      }
+    ],
+    estimatedDeliveryTime: new Date(Date.now() + 45 * 60000).toISOString(), // 45 minutes from now
     createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   };
   orders.push(order);
 
@@ -481,6 +490,102 @@ app.get('/api/orders/:id', authenticateToken, (req, res) => {
     return res.status(404).json({ error: 'Order not found' });
   }
   res.json(order);
+});
+
+// Track order status (public endpoint - only need order ID)
+app.get('/api/orders/:id/track', (req, res) => {
+  const order = orders.find(o => o.id === req.params.id);
+  if (!order) {
+    return res.status(404).json({ error: 'Order not found' });
+  }
+  
+  // Return tracking information without sensitive user data
+  res.json({
+    id: order.id,
+    status: order.status,
+    statusHistory: order.statusHistory,
+    estimatedDeliveryTime: order.estimatedDeliveryTime,
+    createdAt: order.createdAt,
+    updatedAt: order.updatedAt,
+    totalAmount: order.totalAmount,
+    items: order.items.map(item => ({
+      name: item.name,
+      quantity: item.quantity,
+      price: item.price
+    }))
+  });
+});
+
+// Admin: Update order status
+app.patch('/api/admin/orders/:id/status', authenticateToken, (req, res) => {
+  // Check if user is admin (simple check based on email)
+  if (!req.user.email || !req.user.email.toLowerCase().includes('admin')) {
+    return res.status(403).json({ error: 'Admin access required' });
+  }
+
+  const { status, note } = req.body;
+  const validStatuses = ['pending', 'confirmed', 'preparing', 'out-for-delivery', 'delivered', 'cancelled'];
+  
+  if (!status || !validStatuses.includes(status)) {
+    return res.status(400).json({ 
+      error: 'Invalid status', 
+      validStatuses 
+    });
+  }
+
+  const order = orders.find(o => o.id === req.params.id);
+  if (!order) {
+    return res.status(404).json({ error: 'Order not found' });
+  }
+
+  // Update order status
+  order.status = status;
+  order.updatedAt = new Date().toISOString();
+  
+  // Add to status history
+  order.statusHistory.push({
+    status: status,
+    timestamp: new Date().toISOString(),
+    note: note || `Order status updated to ${status}`,
+    updatedBy: req.user.email
+  });
+
+  // Update estimated delivery time based on status
+  if (status === 'confirmed') {
+    order.estimatedDeliveryTime = new Date(Date.now() + 40 * 60000).toISOString(); // 40 min
+  } else if (status === 'preparing') {
+    order.estimatedDeliveryTime = new Date(Date.now() + 30 * 60000).toISOString(); // 30 min
+  } else if (status === 'out-for-delivery') {
+    order.estimatedDeliveryTime = new Date(Date.now() + 15 * 60000).toISOString(); // 15 min
+  } else if (status === 'delivered') {
+    order.estimatedDeliveryTime = new Date().toISOString(); // Now
+  }
+
+  console.log(`Order ${order.id} status updated to ${status} by ${req.user.email}`);
+  res.json(order);
+});
+
+// Admin: Get all orders with filters
+app.get('/api/admin/orders', authenticateToken, (req, res) => {
+  // Check if user is admin
+  if (!req.user.email || !req.user.email.toLowerCase().includes('admin')) {
+    return res.status(403).json({ error: 'Admin access required' });
+  }
+
+  let filteredOrders = [...orders];
+
+  // Filter by status
+  if (req.query.status) {
+    filteredOrders = filteredOrders.filter(o => o.status === req.query.status);
+  }
+
+  // Sort by creation date (newest first)
+  filteredOrders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  res.json({
+    count: filteredOrders.length,
+    orders: filteredOrders
+  });
 });
 
 // ---------------- Contact / Support ---------------- //
