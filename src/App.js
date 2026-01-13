@@ -20,6 +20,8 @@ import MyOrders from './component/Dashboard/orders/myorders';
 import Checkout from './component/Dashboard/orders/checkout';
 import TopRated from './component/Dashboard/reviews/TopRated';
 import SearchResults from './component/Dashboard/search/SearchResults';
+import OrderTracking from './component/Dashboard/orders/OrderTracking';
+import AdminOrders from './component/Dashboard/orders/AdminOrders';
 
 const ProtectedRoute = ({ component: Component, ...rest }) => (
   <Route
@@ -50,6 +52,7 @@ function App() {
           <Route path='/search'> <SearchResults /></Route>
           <ProtectedRoute path='/cart' component={Cart} />
           <ProtectedRoute path='/checkout' component={Checkout} />
+          <ProtectedRoute path='/orders/:orderId/track' component={OrderTracking} />
           <Route path='/singledish'> <Singledish /></Route>
           <Route path='/alldish'> <Alldish /></Route>
           <ProtectedRoute path='/profile' component={ProfileNew} />
@@ -57,6 +60,7 @@ function App() {
   <Route path='/team'> <Team /> </Route>
   <Route path='/contact'> <ContactUs /> </Route>
   <ProtectedRoute path='/favorites' component={Favorites} />
+  <ProtectedRoute path='/admin/orders' component={AdminOrders} />
   <ProtectedRoute path='/admin' component={Admin} />
   <ProtectedRoute path='/myorders' component={MyOrders} />
   <Route path='/toprated'> <TopRated /> </Route>
