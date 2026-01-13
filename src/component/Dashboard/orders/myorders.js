@@ -119,6 +119,12 @@ function MyOrders() {
                                     </div>
                                     <div className="order-actions">
                                         <button
+                                            className="btn-track"
+                                            onClick={() => history.push(`/orders/${order.id}/track`)}
+                                        >
+                                            📍 Track Order
+                                        </button>
+                                        <button
                                             className="btn-reorder"
                                             onClick={() => handleReorder(order)}
                                         >
