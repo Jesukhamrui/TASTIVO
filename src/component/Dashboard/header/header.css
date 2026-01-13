@@ -204,15 +204,6 @@
     flex-shrink: 0;
 }
 
-.user-greeting {
-    color: white;
-    font-weight: 600;
-    font-size: 0.95rem;
-    background: rgba(255, 255, 255, 0.15);
-    padding: 8px 16px;
-    border-radius: 20px;
-}
-
 .logout-button {
     padding: 10px 20px;
     background: rgba(255, 107, 107, 0.9);
