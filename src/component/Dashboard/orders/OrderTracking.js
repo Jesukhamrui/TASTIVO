@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import './ordertracking.css';
 
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 const OrderTracking = () => {
   const { orderId } = useParams();
   const history = useHistory();
@@ -9,8 +11,6 @@ const OrderTracking = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [autoRefresh, setAutoRefresh] = useState(true);
-
-  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
   const statusSteps = [
     { key: 'pending', label: 'Order Placed', icon: '📝' },
@@ -20,34 +20,53 @@ const OrderTracking = () => {
     { key: 'delivered', label: 'Delivered', icon: '🎉' }
   ];
 
-  const fetchOrderStatus = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}/track`);
-      if (!response.ok) {
-        throw new Error('Order not found');
-      }
-      const data = await response.json();
-      setOrder(data);
-      setError('');
-      
-      // Stop auto-refresh if delivered or cancelled
-      if (data.status === 'delivered' || data.status === 'cancelled') {
-        setAutoRefresh(false);
-      }
-    } catch (err) {
-      setError(err.message || 'Failed to fetch order status');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchOrderStatus = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}/track`);
+        if (!response.ok) {
+          throw new Error('Order not found');
+        }
+        const data = await response.json();
+        setOrder(data);
+        setError('');
+        
+        // Stop auto-refresh if delivered or cancelled
+        if (data.status === 'delivered' || data.status === 'cancelled') {
+          setAutoRefresh(false);
+        }
+      } catch (err) {
+        setError(err.message || 'Failed to fetch order status');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchOrderStatus();
   }, [orderId]);
 
   // Auto-refresh every 30 seconds if order is active
   useEffect(() => {
     if (!autoRefresh) return;
+    
+    const fetchOrderStatus = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}/track`);
+        if (!response.ok) {
+          throw new Error('Order not found');
+        }
+        const data = await response.json();
+        setOrder(data);
+        setError('');
+        
+        // Stop auto-refresh if delivered or cancelled
+        if (data.status === 'delivered' || data.status === 'cancelled') {
+          setAutoRefresh(false);
+        }
+      } catch (err) {
+        setError(err.message || 'Failed to fetch order status');
+      }
+    };
     
     const interval = setInterval(() => {
       fetchOrderStatus();
@@ -231,7 +250,23 @@ const OrderTracking = () => {
         )}
 
         {/* Refresh Button */}
-        <button className="refresh-btn" onClick={fetchOrderStatus}>
+        <button className="refresh-btn" onClick={async () => {
+          try {
+            const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}/track`);
+            if (!response.ok) {
+              throw new Error('Order not found');
+            }
+            const data = await response.json();
+            setOrder(data);
+            setError('');
+            
+            if (data.status === 'delivered' || data.status === 'cancelled') {
+              setAutoRefresh(false);
+            }
+          } catch (err) {
+            setError(err.message || 'Failed to fetch order status');
+          }
+        }}>
           Refresh Status
         </button>
       </div>
