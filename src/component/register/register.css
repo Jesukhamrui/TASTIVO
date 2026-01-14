@@ -37,7 +37,6 @@
 }
 input:focus{
     border-color: rgb(168, 82, 22);
-    caret-color: chocolate ;
 }
 .register-main button, .login-main button{
     margin: 20px 0px !important;
