@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import './adminorders.css';
 
@@ -23,19 +23,7 @@ const AdminOrders = () => {
     { value: 'cancelled', label: 'Cancelled', color: '#e74c3c', icon: '❌' }
   ];
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
-  useEffect(() => {
-    if (filterStatus === 'all') {
-      setFilteredOrders(orders);
-    } else {
-      setFilteredOrders(orders.filter(o => o.status === filterStatus));
-    }
-  }, [filterStatus, orders]);
-
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -61,7 +49,19 @@ const AdminOrders = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [history, API_BASE_URL]);
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
+
+  useEffect(() => {
+    if (filterStatus === 'all') {
+      setFilteredOrders(orders);
+    } else {
+      setFilteredOrders(orders.filter(o => o.status === filterStatus));
+    }
+  }, [filterStatus, orders]);
 
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
