@@ -17,30 +17,30 @@ function Imageslide({ slides }) {
     setCurrentIndex(currentIndex === 0 ? slides.length - 1 : currentIndex - 1);
   }
 
-  function goToNext() {
-    setCurrentIndex(currentIndex === slides.length - 1 ? 0 : currentIndex + 1);
-  }
-
   function goToSlide(slideIndex) {
     setCurrentIndex(slideIndex);
   }
 
   // Automatic sliding effect
   useEffect(() => {
+    const goToNext = () => {
+      setCurrentIndex(currentIndex === slides.length - 1 ? 0 : currentIndex + 1);
+    };
+
     const interval = setInterval(() => {
       goToNext();
     }, 3000); // Change slide every 3 seconds
 
     // Cleanup interval on component unmount
     return () => clearInterval(interval);
-  }, [currentIndex]); // Re-run effect when currentIndex changes
+  }, [currentIndex, slides.length]); // Re-run effect when currentIndex changes
 
   return (
     <div className="sliderstyle">
       <div className="leftArrowStyles" onClick={goToPrevious}>
         ❰
       </div>
-      <div className="rightArrowStyles" onClick={goToNext}>
+      <div className="rightArrowStyles" onClick={() => setCurrentIndex(currentIndex === slides.length - 1 ? 0 : currentIndex + 1)}>
         ❱
       </div>
       <div style={slideStyles}></div>
