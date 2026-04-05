@@ -3,6 +3,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
 dotenv.config();
 
@@ -21,6 +22,9 @@ let users = [];
 let orders = [];
 let contactMessages = [];
 let reviews = [];
+let emailLoginCodes = [];
+let passwordResetCodes = [];
+let passwordResetTokens = [];
 
 // Simple dishes catalog for demo purposes
 const dishes = [
@@ -246,6 +250,60 @@ function publicUser(user) {
   return safe;
 }
 
+function isValidEmail(email) {
+  if (!email || typeof email !== 'string') return false;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function generateEmailLoginCode() {
+  // 6-digit numeric OTP code
+  return String(crypto.randomInt(0, 1000000)).padStart(6, '0');
+}
+
+async function sendLoginCodeEmail(email, code) {
+  // Demo-safe fallback: if no SMTP is configured, print code in server logs.
+  const smtpConfigured = process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS;
+
+  if (!smtpConfigured) {
+    console.log(`[EMAIL LOGIN CODE] ${email}: ${code}`);
+    return;
+  }
+
+  // Lightweight SMTP send using fetch-compatible provider APIs can be added here.
+  // For now, keep behavior explicit to avoid silent failure in production.
+  console.log(`[EMAIL LOGIN CODE] SMTP configured placeholder active for ${email}. Code: ${code}`);
+}
+
+function clearExpiredEmailLoginCodes() {
+  const now = Date.now();
+  emailLoginCodes = emailLoginCodes.filter(entry => entry.expiresAt > now);
+}
+
+function clearExpiredPasswordResetCodes() {
+  const now = Date.now();
+  passwordResetCodes = passwordResetCodes.filter(entry => entry.expiresAt > now);
+}
+
+function clearExpiredPasswordResetTokens() {
+  const now = Date.now();
+  passwordResetTokens = passwordResetTokens.filter(entry => entry.expiresAt > now);
+}
+
+async function sendPasswordResetCodeEmail(email, code) {
+  const smtpConfigured = process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS;
+
+  if (!smtpConfigured) {
+    console.log(`[PASSWORD RESET CODE] ${email}: ${code}`);
+    return;
+  }
+
+  console.log(`[PASSWORD RESET CODE] SMTP configured placeholder active for ${email}. Code: ${code}`);
+}
+
+function generateResetToken() {
+  return crypto.randomBytes(32).toString('hex');
+}
+
 function calculateCartTotals(items) {
   let total = 0;
   const detailedItems = items.map(item => {
@@ -332,6 +390,246 @@ app.post('/api/auth/login', async (req, res, next) => {
 
     const token = generateToken(user);
     res.json({ user: publicUser(user), token });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Request one-time login code via email
+app.post('/api/auth/login/email/request-code', async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    if (!isValidEmail(email)) {
+      return res.status(400).json({ error: 'Valid email is required' });
+    }
+
+    clearExpiredEmailLoginCodes();
+
+    const normalizedEmail = email.toLowerCase();
+    const user = users.find(u => u.email.toLowerCase() === normalizedEmail);
+
+    // Return generic response for unknown emails to avoid user enumeration.
+    if (!user) {
+      return res.json({ message: 'If this email exists, a login code has been sent.' });
+    }
+
+    const lastCode = emailLoginCodes
+      .filter(entry => entry.email === normalizedEmail)
+      .sort((a, b) => b.createdAt - a.createdAt)[0];
+
+    const now = Date.now();
+    if (lastCode && now - lastCode.createdAt < 60 * 1000) {
+      return res.status(429).json({ error: 'Please wait before requesting another code' });
+    }
+
+    const code = generateEmailLoginCode();
+    const codeHash = await bcrypt.hash(code, 10);
+
+    emailLoginCodes = emailLoginCodes.filter(entry => entry.email !== normalizedEmail);
+    emailLoginCodes.push({
+      email: normalizedEmail,
+      codeHash,
+      createdAt: now,
+      expiresAt: now + 10 * 60 * 1000,
+      attempts: 0,
+    });
+
+    await sendLoginCodeEmail(normalizedEmail, code);
+
+    res.json({
+      message: 'If this email exists, a login code has been sent.',
+      expiresInSeconds: 600,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Verify one-time login code and issue JWT
+app.post('/api/auth/login/email/verify-code', async (req, res, next) => {
+  try {
+    const { email, code } = req.body;
+    if (!isValidEmail(email) || !code) {
+      return res.status(400).json({ error: 'Email and code are required' });
+    }
+
+    clearExpiredEmailLoginCodes();
+
+    const normalizedEmail = email.toLowerCase();
+    const record = emailLoginCodes.find(entry => entry.email === normalizedEmail);
+
+    if (!record) {
+      return res.status(401).json({ error: 'Invalid or expired code' });
+    }
+
+    if (record.attempts >= 5) {
+      emailLoginCodes = emailLoginCodes.filter(entry => entry.email !== normalizedEmail);
+      return res.status(429).json({ error: 'Too many invalid attempts. Request a new code.' });
+    }
+
+    const isMatch = await bcrypt.compare(String(code), record.codeHash);
+    if (!isMatch) {
+      record.attempts += 1;
+      return res.status(401).json({ error: 'Invalid or expired code' });
+    }
+
+    const user = users.find(u => u.email.toLowerCase() === normalizedEmail);
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid or expired code' });
+    }
+
+    emailLoginCodes = emailLoginCodes.filter(entry => entry.email !== normalizedEmail);
+
+    const token = generateToken(user);
+    res.json({ user: publicUser(user), token });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Request password reset code via email
+app.post('/api/auth/password-reset/request-code', async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    if (!isValidEmail(email)) {
+      return res.status(400).json({ error: 'Valid email is required' });
+    }
+
+    clearExpiredPasswordResetCodes();
+
+    const normalizedEmail = email.toLowerCase();
+    const user = users.find(u => u.email.toLowerCase() === normalizedEmail);
+
+    // Generic response to avoid account enumeration.
+    if (!user) {
+      return res.json({ message: 'If this email exists, a password reset code has been sent.' });
+    }
+
+    const lastCode = passwordResetCodes
+      .filter(entry => entry.email === normalizedEmail)
+      .sort((a, b) => b.createdAt - a.createdAt)[0];
+
+    const now = Date.now();
+    if (lastCode && now - lastCode.createdAt < 60 * 1000) {
+      return res.status(429).json({ error: 'Please wait before requesting another reset code' });
+    }
+
+    const code = generateEmailLoginCode();
+    const codeHash = await bcrypt.hash(code, 10);
+
+    passwordResetCodes = passwordResetCodes.filter(entry => entry.email !== normalizedEmail);
+    passwordResetCodes.push({
+      email: normalizedEmail,
+      codeHash,
+      createdAt: now,
+      expiresAt: now + 10 * 60 * 1000,
+      attempts: 0,
+    });
+
+    await sendPasswordResetCodeEmail(normalizedEmail, code);
+
+    return res.json({
+      message: 'If this email exists, a password reset code has been sent.',
+      expiresInSeconds: 600,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Verify password reset code and issue short-lived reset token
+app.post('/api/auth/password-reset/verify-code', async (req, res, next) => {
+  try {
+    const { email, code } = req.body;
+    if (!isValidEmail(email) || !code) {
+      return res.status(400).json({ error: 'Email and code are required' });
+    }
+
+    clearExpiredPasswordResetCodes();
+    clearExpiredPasswordResetTokens();
+
+    const normalizedEmail = email.toLowerCase();
+    const record = passwordResetCodes.find(entry => entry.email === normalizedEmail);
+
+    if (!record) {
+      return res.status(401).json({ error: 'Invalid or expired code' });
+    }
+
+    if (record.attempts >= 5) {
+      passwordResetCodes = passwordResetCodes.filter(entry => entry.email !== normalizedEmail);
+      return res.status(429).json({ error: 'Too many invalid attempts. Request a new code.' });
+    }
+
+    const isMatch = await bcrypt.compare(String(code), record.codeHash);
+    if (!isMatch) {
+      record.attempts += 1;
+      return res.status(401).json({ error: 'Invalid or expired code' });
+    }
+
+    const user = users.find(u => u.email.toLowerCase() === normalizedEmail);
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid or expired code' });
+    }
+
+    passwordResetCodes = passwordResetCodes.filter(entry => entry.email !== normalizedEmail);
+
+    const resetToken = generateResetToken();
+    const resetTokenHash = await bcrypt.hash(resetToken, 10);
+
+    passwordResetTokens = passwordResetTokens.filter(entry => entry.email !== normalizedEmail);
+    passwordResetTokens.push({
+      email: normalizedEmail,
+      tokenHash: resetTokenHash,
+      createdAt: Date.now(),
+      expiresAt: Date.now() + 10 * 60 * 1000,
+    });
+
+    return res.json({
+      resetToken,
+      expiresInSeconds: 600,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Confirm password reset with short-lived token
+app.post('/api/auth/password-reset/confirm', async (req, res, next) => {
+  try {
+    const { email, resetToken, newPassword } = req.body;
+    if (!isValidEmail(email) || !resetToken || !newPassword) {
+      return res.status(400).json({ error: 'Email, resetToken, and newPassword are required' });
+    }
+
+    if (String(newPassword).trim().length < 6) {
+      return res.status(400).json({ error: 'New password must be at least 6 characters' });
+    }
+
+    clearExpiredPasswordResetTokens();
+
+    const normalizedEmail = email.toLowerCase();
+    const tokenRecord = passwordResetTokens.find(entry => entry.email === normalizedEmail);
+
+    if (!tokenRecord) {
+      return res.status(401).json({ error: 'Invalid or expired reset token' });
+    }
+
+    const tokenMatches = await bcrypt.compare(String(resetToken), tokenRecord.tokenHash);
+    if (!tokenMatches) {
+      return res.status(401).json({ error: 'Invalid or expired reset token' });
+    }
+
+    const user = users.find(u => u.email.toLowerCase() === normalizedEmail);
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid or expired reset token' });
+    }
+
+    user.passwordHash = await bcrypt.hash(String(newPassword), 10);
+
+    passwordResetTokens = passwordResetTokens.filter(entry => entry.email !== normalizedEmail);
+    passwordResetCodes = passwordResetCodes.filter(entry => entry.email !== normalizedEmail);
+
+    return res.json({ message: 'Password reset successful' });
   } catch (err) {
     next(err);
   }
