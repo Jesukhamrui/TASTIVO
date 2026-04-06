@@ -337,6 +337,51 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', uptime: process.uptime() });
 });
 
+// Reverse geocode coordinates to address details
+app.get('/api/location/reverse-geocode', async (req, res) => {
+  try {
+    const { lat, lon } = req.query;
+    const latitude = Number(lat);
+    const longitude = Number(lon);
+
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+      return res.status(400).json({ error: 'Valid lat and lon query parameters are required' });
+    }
+
+    const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`;
+    const response = await fetch(nominatimUrl, {
+      headers: {
+        'User-Agent': 'Tastivo/1.0 (location lookup)',
+        'Accept': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      return res.status(502).json({ error: 'Failed to fetch location details' });
+    }
+
+    const data = await response.json();
+    const address = data.address || {};
+    const city = address.city || address.town || address.village || address.hamlet || '';
+    const area = address.road || address.suburb || address.neighbourhood || address.county || '';
+    const pincode = address.postcode || '';
+
+    const displayAddress = `${area} ${city}`.trim() || data.display_name || `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+
+    res.json({
+      latitude,
+      longitude,
+      address: displayAddress,
+      city,
+      pincode,
+      raw: data,
+    });
+  } catch (err) {
+    console.error('Reverse geocode failed:', err);
+    res.status(500).json({ error: 'Failed to resolve current location' });
+  }
+});
+
 // ---------------- Auth & Users ---------------- //
 
 // Register new user
