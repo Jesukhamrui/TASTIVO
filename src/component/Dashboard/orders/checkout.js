@@ -94,6 +94,11 @@ function Checkout() {
     };
 
     const getCurrentLocation = () => {
+        if (!window.isSecureContext) {
+            setLocationStatus("Location access requires a secure context (HTTPS or localhost).");
+            return;
+        }
+
         if (!navigator.geolocation) {
             setLocationStatus("Geolocation is not supported by your browser");
             return;
@@ -113,16 +118,18 @@ function Checkout() {
 
                 // Try to get address from coordinates using reverse geocoding
                 try {
-                    // Using Open-Meteo Geocoding API (free, no key required)
+                    // Use backend reverse-geocode endpoint to avoid browser CORS/provider restrictions
                     const response = await fetch(
-                        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+                        `${API_BASE_URL}/api/location/reverse-geocode?lat=${latitude}&lon=${longitude}`
                     );
+                    if (!response.ok) {
+                        throw new Error("Reverse geocoding failed");
+                    }
                     const data = await response.json();
 
-                    const address = data.address || {};
-                    const fullAddress = `${address.road || ""} ${
-                        address.city || address.town || ""
-                    }`.trim();
+                    const fullAddress = data.address || `${latitude}, ${longitude}`;
+                    const city = data.city || "";
+                    const pincode = data.pincode || "";
 
                     setLocationData((prev) => ({
                         ...prev,
@@ -132,7 +139,8 @@ function Checkout() {
                     setFormData((prev) => ({
                         ...prev,
                         address: fullAddress || `${latitude}, ${longitude}`,
-                        city: address.city || address.town || "",
+                        city: city || prev.city,
+                        pincode: pincode || prev.pincode,
                     }));
 
                     setLocationStatus(
@@ -167,6 +175,11 @@ function Checkout() {
                 }
                 setLocationStatus(errorMessage);
                 setLocationLoading(false);
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 15000,
+                maximumAge: 0,
             }
         );
     };
