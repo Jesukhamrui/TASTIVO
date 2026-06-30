@@ -14,6 +14,7 @@ function ProfileNew() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+    const [sessionChecked, setSessionChecked] = useState(false);
     
     const [formData, setFormData] = useState({
         name: "",
@@ -26,48 +27,100 @@ function ProfileNew() {
 
     const [favoritesList, setFavoritesList] = useState([]);
 
-    useEffect(() => {
-        const stored = localStorage.getItem('user');
-        if (stored) {
-            try {
-                const userData = JSON.parse(stored);
-                setUser(userData);
-                setFormData(prev => ({
-                    ...prev,
-                    name: userData.name || "",
-                    email: userData.email || "",
-                    phone: userData.phone || ""
-                }));
-            } catch (e) {
-                setError("Error loading user data");
-            }
-        }
-    }, []);
+    const handleInvalidSession = (message) => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setUser(null);
+        setFavoritesList([]);
+        setError(message || 'Session expired. Please log in again.');
+        history.replace('/login');
+    };
 
     useEffect(() => {
-        fetchFavorites();
-    }, []);
-
-    const fetchFavorites = async () => {
-        try {
+        const loadProfile = async () => {
             const token = localStorage.getItem('token');
+            const stored = localStorage.getItem('user');
+
+            if (token) {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                        },
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        const currentUser = data.user;
+                        setUser(currentUser);
+                        setFormData(prev => ({
+                            ...prev,
+                            name: currentUser.name || "",
+                            email: currentUser.email || "",
+                            phone: currentUser.phone || ""
+                        }));
+                        localStorage.setItem('user', JSON.stringify(currentUser));
+                        await fetchFavorites(token);
+                        setSessionChecked(true);
+                        return;
+                    }
+
+                    const data = await response.json().catch(() => ({}));
+                    handleInvalidSession(data.error || 'Session expired. Please log in again.');
+                    setSessionChecked(true);
+                    return;
+                } catch (e) {
+                    console.error('Error loading profile from server:', e);
+                    handleInvalidSession('Session expired. Please log in again.');
+                    setSessionChecked(true);
+                    return;
+                }
+            }
+
+            if (stored) {
+                try {
+                    const userData = JSON.parse(stored);
+                    setUser(userData);
+                    setFormData(prev => ({
+                        ...prev,
+                        name: userData.name || "",
+                        email: userData.email || "",
+                        phone: userData.phone || ""
+                    }));
+                    setSessionChecked(true);
+                } catch (e) {
+                    setError("Error loading user data");
+                    setSessionChecked(true);
+                }
+                return;
+            }
+
+            setSessionChecked(true);
+        };
+
+        loadProfile();
+    }, []);
+
+    const fetchFavorites = async (tokenFromProfile) => {
+        try {
+            const token = tokenFromProfile || localStorage.getItem('token');
             if (!token) {
                 console.log('No token found for favorites');
                 return;
             }
 
-            console.log('Fetching favorites with token:', token.substring(0, 20) + '...');
             const response = await fetch(`${API_BASE_URL}/api/favorites`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 },
             });
 
-            console.log('Favorites response status:', response.status);
             if (response.ok) {
                 const data = await response.json();
-                console.log('Favorites fetched:', data);
                 setFavoritesList(data);
+            } else if (response.status === 401) {
+                const data = await response.json().catch(() => ({}));
+                handleInvalidSession(data.error || 'Session expired. Please log in again.');
             } else {
                 console.error('Failed to fetch favorites:', response.status, response.statusText);
             }
@@ -130,10 +183,6 @@ function ProfileNew() {
                 updateData.newPassword = formData.newPassword;
             }
 
-            console.log('Sending profile update:', updateData);
-            console.log('API URL:', `${API_BASE_URL}/api/auth/update-profile`);
-            console.log('Token exists:', !!token);
-
             const response = await fetch(`${API_BASE_URL}/api/auth/update-profile`, {
                 method: 'PUT',
                 headers: {
@@ -143,22 +192,21 @@ function ProfileNew() {
                 body: JSON.stringify(updateData)
             });
 
-            console.log('Response status:', response.status);
             const data = await response.json();
-            console.log('Response data:', data);
 
             if (!response.ok) {
+                if (response.status === 401) {
+                    handleInvalidSession(data.error || 'Session expired. Please log in again.');
+                    return;
+                }
                 setError(data.error || 'Failed to update profile');
                 setLoading(false);
                 return;
             }
 
-            // Update localStorage
-            const updatedUser = { ...user, ...updateData };
-            delete updatedUser.currentPassword;
-            delete updatedUser.newPassword;
+            const updatedUser = data.user || { ...user, ...updateData };
             localStorage.setItem('user', JSON.stringify(updatedUser));
-            
+
             setUser(updatedUser);
             setFormData(prev => ({
                 ...prev,
@@ -193,11 +241,28 @@ function ProfileNew() {
 
             if (response.ok) {
                 setFavoritesList(prev => prev.filter(dish => String(dish.id) !== String(dishId)));
+            } else if (response.status === 401) {
+                const data = await response.json().catch(() => ({}));
+                handleInvalidSession(data.error || 'Session expired. Please log in again.');
             }
         } catch (err) {
             console.error('Error removing favorite:', err);
         }
     };
+
+    if (!sessionChecked) {
+        return (
+            <div className="profile-container">
+                <Header />
+                <div className="profile-content">
+                    <div className="profile-message">
+                        <h2>Loading profile...</h2>
+                    </div>
+                </div>
+                <Footer />
+            </div>
+        );
+    }
 
     if (!user) {
         return (
