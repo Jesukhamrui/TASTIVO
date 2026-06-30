@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 
 dotenv.config();
 
@@ -261,17 +262,22 @@ function generateEmailLoginCode() {
 }
 
 async function sendLoginCodeEmail(email, code) {
-  // Demo-safe fallback: if no SMTP is configured, print code in server logs.
-  const smtpConfigured = process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS;
+  const transporter = getMailTransporter();
 
-  if (!smtpConfigured) {
+  if (!transporter) {
     console.log(`[EMAIL LOGIN CODE] ${email}: ${code}`);
     return;
   }
 
-  // Lightweight SMTP send using fetch-compatible provider APIs can be added here.
-  // For now, keep behavior explicit to avoid silent failure in production.
-  console.log(`[EMAIL LOGIN CODE] SMTP configured placeholder active for ${email}. Code: ${code}`);
+  const fromAddress = process.env.MAIL_FROM || process.env.SMTP_USER;
+
+  await transporter.sendMail({
+    from: fromAddress,
+    to: email,
+    subject: 'Your Tastivo login code',
+    text: `Your Tastivo login code is ${code}. It expires in 10 minutes.`,
+    html: `<p>Your Tastivo login code is <strong>${code}</strong>.</p><p>It expires in 10 minutes.</p>`,
+  });
 }
 
 function clearExpiredEmailLoginCodes() {
@@ -289,15 +295,44 @@ function clearExpiredPasswordResetTokens() {
   passwordResetTokens = passwordResetTokens.filter(entry => entry.expiresAt > now);
 }
 
-async function sendPasswordResetCodeEmail(email, code) {
-  const smtpConfigured = process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS;
+function getMailTransporter() {
+  const smtpHost = process.env.SMTP_HOST;
+  const smtpPort = Number(process.env.SMTP_PORT || 587);
+  const smtpUser = process.env.SMTP_USER;
+  const smtpPass = process.env.SMTP_PASS;
 
-  if (!smtpConfigured) {
+  if (!smtpHost || !smtpUser || !smtpPass) {
+    return null;
+  }
+
+  return nodemailer.createTransport({
+    host: smtpHost,
+    port: smtpPort,
+    secure: String(process.env.SMTP_SECURE || 'false').toLowerCase() === 'true',
+    auth: {
+      user: smtpUser,
+      pass: smtpPass,
+    },
+  });
+}
+
+async function sendPasswordResetCodeEmail(email, code) {
+  const transporter = getMailTransporter();
+
+  if (!transporter) {
     console.log(`[PASSWORD RESET CODE] ${email}: ${code}`);
     return;
   }
 
-  console.log(`[PASSWORD RESET CODE] SMTP configured placeholder active for ${email}. Code: ${code}`);
+  const fromAddress = process.env.MAIL_FROM || process.env.SMTP_USER;
+
+  await transporter.sendMail({
+    from: fromAddress,
+    to: email,
+    subject: 'Your Tastivo password reset code',
+    text: `Your Tastivo password reset code is ${code}. It expires in 10 minutes.`,
+    html: `<p>Your Tastivo password reset code is <strong>${code}</strong>.</p><p>It expires in 10 minutes.</p>`,
+  });
 }
 
 function generateResetToken() {
