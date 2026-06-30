@@ -18,6 +18,21 @@ Basic Express API scaffold for Tastivo.
    npm start
    ```
 
+## Gmail Password Reset Email Setup
+
+Use a Gmail app password, not your normal Gmail login password.
+
+Set these values in `backend/.env`:
+
+- `SMTP_HOST=smtp.gmail.com`
+- `SMTP_PORT=465`
+- `SMTP_SECURE=true`
+- `SMTP_USER=yourgmailaddress@gmail.com`
+- `SMTP_PASS=your-gmail-app-password`
+- `MAIL_FROM=yourgmailaddress@gmail.com`
+
+If you prefer port 587, set `SMTP_PORT=587` and `SMTP_SECURE=false`.
+
 ## Main Endpoints (summary)
 
 ### Health
