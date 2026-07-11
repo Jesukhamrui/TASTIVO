@@ -18,18 +18,22 @@ Basic Express API scaffold for Tastivo.
    npm start
    ```
 
-## Gmail Password Reset Email Setup
+## Gmail OTP Email Setup
 
 Use a Gmail app password, not your normal Gmail login password.
 
-Set these values in `backend/.env`:
+Add your real Gmail sender account details in `backend/.env`:
 
 - `SMTP_HOST=smtp.gmail.com`
 - `SMTP_PORT=465`
 - `SMTP_SECURE=true`
-- `SMTP_USER=yourgmailaddress@gmail.com`
-- `SMTP_PASS=your-gmail-app-password`
-- `MAIL_FROM=yourgmailaddress@gmail.com`
+- `SMTP_USER=your-real-gmail-address@gmail.com`
+- `SMTP_PASS=your-16-character-google-app-password`
+- `MAIL_FROM=your-real-gmail-address@gmail.com`
+
+Place those values in the `backend/.env` file, not in the frontend `.env` file and not in source code.
+
+The same Gmail account is used only as the sender. OTP emails are still delivered to each registered user's email address based on the login request.
 
 If you prefer port 587, set `SMTP_PORT=587` and `SMTP_SECURE=false`.
 
