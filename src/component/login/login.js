@@ -166,14 +166,22 @@ function Login(){
          }
 
          setCodeSent(true)
-         setResendSeconds(60)
+         setResendSeconds(data.retryAfterSeconds || 60)
          resetOtpInputs()
 
          if (loginMode === 'reset') {
             setResetStep(2)
-            setSuccessMessage('Reset code sent. Enter the 6-digit code from your email.')
+            setSuccessMessage(
+               data.retryAfterSeconds
+                  ? `${data.message} You can request a new one in ${data.retryAfterSeconds} seconds.`
+                  : 'Reset code sent. Enter the 6-digit code from your email.'
+            )
          } else {
-            setSuccessMessage(data.message || 'Code sent to your email')
+            setSuccessMessage(
+               data.retryAfterSeconds
+                  ? `${data.message} You can request a new one in ${data.retryAfterSeconds} seconds.`
+                  : (data.message || 'Code sent to your email')
+            )
          }
 
          setTimeout(() => {
