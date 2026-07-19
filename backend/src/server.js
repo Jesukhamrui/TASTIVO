@@ -4,9 +4,13 @@ const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const fs = require('fs');
 const nodemailer = require('nodemailer');
+const path = require('path');
 
-dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
+
+const USERS_DATA_FILE = path.resolve(__dirname, '../data/users.json');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -19,13 +23,45 @@ app.use(express.urlencoded({ extended: true }));
 
 // ---------------- In-memory demo data ---------------- //
 
-let users = [];
 let orders = [];
 let contactMessages = [];
 let reviews = [];
 let emailLoginCodes = [];
 let passwordResetCodes = [];
 let passwordResetTokens = [];
+
+const MAIL_PLACEHOLDER_VALUES = new Set([
+  'yourgmailaddress@gmail.com',
+  'your-real-gmail-address@gmail.com',
+  'your-gmail-app-password',
+  'your-16-character-google-app-password',
+]);
+
+function loadUsers() {
+  try {
+    if (!fs.existsSync(USERS_DATA_FILE)) {
+      return [];
+    }
+
+    const raw = fs.readFileSync(USERS_DATA_FILE, 'utf8');
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    console.error('Failed to load users data:', error);
+    return [];
+  }
+}
+
+function saveUsers() {
+  try {
+    fs.mkdirSync(path.dirname(USERS_DATA_FILE), { recursive: true });
+    fs.writeFileSync(USERS_DATA_FILE, JSON.stringify(users, null, 2));
+  } catch (error) {
+    console.error('Failed to save users data:', error);
+  }
+}
+
+let users = loadUsers();
 
 // Simple dishes catalog for demo purposes
 const dishes = [
@@ -256,17 +292,56 @@ function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+function getMailConfigIssues() {
+  const issues = [];
+  const smtpHost = process.env.SMTP_HOST;
+  const smtpPort = process.env.SMTP_PORT;
+  const smtpUser = process.env.SMTP_USER;
+  const smtpPass = process.env.SMTP_PASS;
+  const mailFrom = process.env.MAIL_FROM;
+
+  if (!smtpHost) issues.push('SMTP_HOST is missing');
+  if (!smtpPort) issues.push('SMTP_PORT is missing');
+  if (!smtpUser) issues.push('SMTP_USER is missing');
+  if (!smtpPass) issues.push('SMTP_PASS is missing');
+
+  if (smtpUser && MAIL_PLACEHOLDER_VALUES.has(smtpUser.trim())) {
+    issues.push('SMTP_USER still has the placeholder Gmail address');
+  }
+
+  if (smtpPass && MAIL_PLACEHOLDER_VALUES.has(smtpPass.trim())) {
+    issues.push('SMTP_PASS still has the placeholder Gmail app password');
+  }
+
+  if (mailFrom && MAIL_PLACEHOLDER_VALUES.has(mailFrom.trim())) {
+    issues.push('MAIL_FROM still has the placeholder Gmail address');
+  }
+
+  return issues;
+}
+
+function assertMailConfigReady(actionLabel) {
+  const issues = getMailConfigIssues();
+
+  if (issues.length > 0) {
+    throw new Error(
+      `${actionLabel} email is not configured yet: ${issues.join(', ')}. Update backend/.env with your real Gmail address and app password.`
+    );
+  }
+}
+
 function generateEmailLoginCode() {
   // 6-digit numeric OTP code
   return String(crypto.randomInt(0, 1000000)).padStart(6, '0');
 }
 
 async function sendLoginCodeEmail(email, code) {
+  assertMailConfigReady('Login code');
+
   const transporter = getMailTransporter();
 
   if (!transporter) {
-    console.log(`[EMAIL LOGIN CODE] ${email}: ${code}`);
-    return;
+    throw new Error('SMTP is not configured. Set SMTP_HOST, SMTP_PORT, SMTP_USER, and SMTP_PASS in backend/.env to send login codes by email.');
   }
 
   const fromAddress = process.env.MAIL_FROM || process.env.SMTP_USER;
@@ -317,11 +392,12 @@ function getMailTransporter() {
 }
 
 async function sendPasswordResetCodeEmail(email, code) {
+  assertMailConfigReady('Password reset code');
+
   const transporter = getMailTransporter();
 
   if (!transporter) {
-    console.log(`[PASSWORD RESET CODE] ${email}: ${code}`);
-    return;
+    throw new Error('SMTP is not configured. Set SMTP_HOST, SMTP_PORT, SMTP_USER, and SMTP_PASS in backend/.env to send password reset codes by email.');
   }
 
   const fromAddress = process.env.MAIL_FROM || process.env.SMTP_USER;
@@ -442,6 +518,7 @@ app.post('/api/auth/register', async (req, res, next) => {
       favorites: [],
     };
     users.push(newUser);
+    saveUsers();
 
     const token = generateToken(newUser);
     res.status(201).json({ user: publicUser(newUser), token });
@@ -591,7 +668,11 @@ app.post('/api/auth/password-reset/request-code', async (req, res, next) => {
 
     const now = Date.now();
     if (lastCode && now - lastCode.createdAt < 60 * 1000) {
-      return res.status(429).json({ error: 'Please wait before requesting another reset code' });
+      const retryAfterSeconds = Math.ceil((60 * 1000 - (now - lastCode.createdAt)) / 1000);
+      return res.json({
+        message: 'A reset code was already sent recently. Please wait before requesting another one.',
+        retryAfterSeconds,
+      });
     }
 
     const code = generateEmailLoginCode();
@@ -705,6 +786,7 @@ app.post('/api/auth/password-reset/confirm', async (req, res, next) => {
     }
 
     user.passwordHash = await bcrypt.hash(String(newPassword), 10);
+    saveUsers();
 
     passwordResetTokens = passwordResetTokens.filter(entry => entry.email !== normalizedEmail);
     passwordResetCodes = passwordResetCodes.filter(entry => entry.email !== normalizedEmail);
@@ -765,6 +847,7 @@ app.put('/api/auth/update-profile', authenticateToken, async (req, res) => {
     req.user.name = name;
     req.user.email = email;
     req.user.phone = phoneToUpdate;
+    saveUsers();
     
     console.log('Profile updated successfully for user:', req.user?.id);
 
@@ -1078,6 +1161,7 @@ app.post('/api/favorites/:dishId', authenticateToken, (req, res) => {
   }
   if (!req.user.favorites.includes(dishId)) {
     req.user.favorites.push(dishId);
+    saveUsers();
   }
   res.json({ favorites: req.user.favorites });
 });
@@ -1086,6 +1170,7 @@ app.post('/api/favorites/:dishId', authenticateToken, (req, res) => {
 app.delete('/api/favorites/:dishId', authenticateToken, (req, res) => {
   const dishId = req.params.dishId;
   req.user.favorites = req.user.favorites.filter(id => id !== dishId);
+  saveUsers();
   res.json({ favorites: req.user.favorites });
 });
 
@@ -1230,6 +1315,16 @@ app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
   res.status(500).json({ error: 'Internal server error' });
 });
+
+const mailConfigIssues = getMailConfigIssues();
+
+if (mailConfigIssues.length > 0) {
+  console.warn('Mail config warning:');
+  for (const issue of mailConfigIssues) {
+    console.warn(`- ${issue}`);
+  }
+  console.warn('Update backend/.env with real Gmail SMTP credentials before requesting login or password reset codes.');
+}
 
 app.listen(PORT, () => {
   console.log(`Tastivo backend listening on port ${PORT}`);
