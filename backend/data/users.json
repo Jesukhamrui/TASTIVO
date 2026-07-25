@@ -6,5 +6,13 @@
     "phone": "",
     "passwordHash": "$2b$10$zrfLcgkzIg9nq3v1OOPcWeoqWZn7NWoysx/.P9xWpOzPRsreYCaHa",
     "favorites": []
+  },
+  {
+    "id": "2",
+    "name": "jk",
+    "email": "jesukhamrui@gmail.com",
+    "phone": "",
+    "passwordHash": "$2b$10$u4g0e4clZ7PL8LrUsBosFOFR4V66ZWFsdTPZ.PHOgUXKS5qbfpjuy",
+    "favorites": []
   }
 ]
