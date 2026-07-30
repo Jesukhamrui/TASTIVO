@@ -22,6 +22,8 @@ Basic Express API scaffold for Tastivo.
 
 Use a Gmail app password, not your normal Gmail login password.
 
+Before you fill in the values below, enable 2-Step Verification on the Gmail account and create a Google app password for Mail. Google will not accept the normal account password here.
+
 Add your real Gmail sender account details in `backend/.env`:
 
 - `SMTP_HOST=smtp.gmail.com`
@@ -34,6 +36,14 @@ Add your real Gmail sender account details in `backend/.env`:
 Place those values in the `backend/.env` file, not in the frontend `.env` file and not in source code.
 
 The same Gmail account is used only as the sender. OTP emails are still delivered to each registered user's email address based on the login request.
+
+If you want the exact placement:
+
+1. Open [backend/.env](./.env).
+2. Replace `SMTP_USER` with your Gmail address.
+3. Replace `SMTP_PASS` with the 16-character Google app password.
+4. Keep `MAIL_FROM` equal to the same Gmail address.
+5. Restart the backend after saving.
 
 If you prefer port 587, set `SMTP_PORT=587` and `SMTP_SECURE=false`.
 
